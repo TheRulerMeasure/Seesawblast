@@ -1,11 +1,13 @@
 import { Scene } from 'phaser'
 import Seesaw from '../gameobjects/Seesaw'
+import { Projectiles } from '../constants/GameConst'
+import Bullet from '../gameobjects/projectiles/Bullet'
 
 export class Game extends Scene
 {
     private seesaw: Seesaw
 
-    private bullet: Phaser.GameObjects.Image
+    private bulletGroup: Phaser.Physics.Arcade.Group
 
     constructor ()
     {
@@ -21,8 +23,16 @@ export class Game extends Scene
 
     create ()
     {
-        this.bullet = this.add.image(0, 0, 'bullet')
+        this.bulletGroup = this.physics.add.group({
+            classType: Bullet,
+            defaultKey: 'bullet',
+            maxSize: 100,
+            runChildUpdate: true,
+        })
+
         this.seesaw = this.add.existing(new Seesaw(this))
+        this.seesaw.setDepth(10)
+
         this.seesaw.on('turret_left_fired', this.onSeesawTurretLeftFired, this)
         this.seesaw.on('turret_right_fired', this.onSeesawTurretRightFired, this)
     }
@@ -32,13 +42,27 @@ export class Game extends Scene
         this.seesaw.update(time, delta)
     }
 
-    private onSeesawTurretLeftFired(x: number, y: number)
+    private onSeesawTurretLeftFired(x: number, y: number, rotation: number, rotVel: number, _projectile: Projectiles)
     {
-        this.bullet.setPosition(x, y)
+        const bullet = this.bulletGroup.get() as Bullet
+        if (bullet)
+        {
+            const r = rotation - Math.PI * 0.5
+            let addVel = Math.max(rotVel, 0.0)
+            addVel *= 1000.0
+            bullet.launch(x, y, r, addVel)
+        }
     }
 
-    private onSeesawTurretRightFired(x: number, y: number)
+    private onSeesawTurretRightFired(x: number, y: number, rotation: number, rotVel: number, _projectile: Projectiles)
     {
-        this.bullet.setPosition(x, y)
+        const bullet = this.bulletGroup.get() as Bullet
+        if (bullet)
+        {
+            const r = rotation - Math.PI * 0.5
+            let addVel = Math.min(rotVel, 0.0) * -1.0
+            addVel *= 1000.0
+            bullet.launch(x, y, r, addVel)
+        }
     }
 }

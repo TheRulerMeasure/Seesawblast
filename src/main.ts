@@ -12,13 +12,13 @@ const config: Types.Core.GameConfig = {
     backgroundColor: '#86a392',
     scale: {
         mode: Scale.FIT,
-        autoCenter: Scale.CENTER_BOTH
+        autoCenter: Scale.CENTER_BOTH,
     },
     physics: {
         default: 'arcade',
         arcade: {
             gravity: { x : 0, y: 0 },
-            debug: true,
+            debug: false,
         },
     },
     scene: [

@@ -1,9 +1,12 @@
 import { Input } from 'phaser'
-import { GAME_HEIGHT, GAME_WIDTH } from '../constants/GameConst'
+import { GAME_HEIGHT, GAME_WIDTH, Projectiles } from '../constants/GameConst'
 import Turret from './turrets/Turret'
 
 export default class Seesaw extends Phaser.GameObjects.Container
 {
+    public friction: number = 0.8
+    public maxRotationVelocity: number = 0.3
+
     public turretLeft: Turret
     public turretRight: Turret
 
@@ -54,9 +57,32 @@ export default class Seesaw extends Phaser.GameObjects.Container
     {
         this.turretLeft.inputFire = this.leftKeys[0].isDown || this.leftKeys[1].isDown
         this.turretRight.inputFire = this.rightKeys[0].isDown || this.rightKeys[1].isDown
+
         this.turretLeft.update(time, delta)
         this.turretRight.update(time, delta)
+
         this.turretBase.rotation += this.rotationVelocity * delta * 0.01
+        const frictionThreshold = 0.002
+        if (this.rotationVelocity > frictionThreshold)
+        {
+            this.rotationVelocity -= this.friction * delta * 0.00001
+            if (this.rotationVelocity <= frictionThreshold)
+            {
+                this.rotationVelocity = 0.0
+            }
+        }
+        else if (this.rotationVelocity < -frictionThreshold)
+        {
+            this.rotationVelocity += this.friction * delta * 0.00001
+            if (this.rotationVelocity >= -frictionThreshold)
+            {
+                this.rotationVelocity = 0.0
+            }
+        }
+        else
+        {
+            this.rotationVelocity = 0.0
+        }
     }
 
     private addTurretBase(scene: Phaser.Scene)
@@ -69,19 +95,21 @@ export default class Seesaw extends Phaser.GameObjects.Container
         })
     }
 
-    private onTurretLeftFired()
+    private onTurretLeftFired(projectile: Projectiles)
     {
         this.rotationVelocity -= this.turretLeft.maxForce * 0.01
+        this.rotationVelocity = Math.max(this.rotationVelocity, -this.maxRotationVelocity)
         const x = Math.cos(this.turretBase.rotation) * this.turretLeftOffsetX + this.x
         const y = Math.sin(this.turretBase.rotation) * this.turretLeftOffsetX + this.y
-        this.emit('turret_left_fired', x, y)
+        this.emit('turret_left_fired', x, y, this.turretBase.rotation, this.rotationVelocity, projectile)
     }
 
-    private onTurretRightFired()
+    private onTurretRightFired(projectile: Projectiles)
     {
         this.rotationVelocity += this.turretRight.maxForce * 0.01
+        this.rotationVelocity = Math.min(this.rotationVelocity, this.maxRotationVelocity)
         const x = Math.cos(this.turretBase.rotation) * this.turretRightOffsetX + this.x
         const y = Math.sin(this.turretBase.rotation) * this.turretRightOffsetX + this.y
-        this.emit('turret_right_fired', x, y)
+        this.emit('turret_right_fired', x, y, this.turretBase.rotation, this.rotationVelocity, projectile)
     }
 }
