@@ -2,6 +2,8 @@ import { GAME_HEIGHT, GAME_WIDTH } from '../../constants/GameConst'
 
 export default class Bullet extends Phaser.Physics.Arcade.Image
 {
+    public damage: number = 15
+
     update(_time: number, _delta: number)
     {
         if (this.x < 0 || this.x > GAME_WIDTH)
@@ -14,10 +16,12 @@ export default class Bullet extends Phaser.Physics.Arcade.Image
         }
     }
 
-    public launch(x: number, y: number, rotation: number, additionSpeed: number)
+    public launch(x: number, y: number, rotation: number, additionSpeed: number, texture: string = 'bullet')
     {
         this.setSize(8, 8)
         this.setRotation(rotation)
+
+        this.setTexture(texture)
 
         this.enableBody(true, x, y, true, true)
 

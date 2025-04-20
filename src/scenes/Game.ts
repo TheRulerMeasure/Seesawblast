@@ -1,6 +1,6 @@
 import { Scene } from 'phaser'
 import Seesaw from '../gameobjects/Seesaw'
-import { GAME_HEIGHT, GAME_WIDTH, Projectiles } from '../constants/GameConst'
+import { GAME_HEIGHT, GAME_WIDTH, Projectiles, Turrets } from '../constants/GameConst'
 import Bullet from '../gameobjects/projectiles/Bullet'
 import Robo from '../gameobjects/mobs/Robo'
 
@@ -11,7 +11,7 @@ export class Game extends Scene
     private bulletGroup: Phaser.Physics.Arcade.Group
     private roboGroup: Phaser.Physics.Arcade.Group
 
-    private readonly maxRoboSpawnDelay: number = 1000.0
+    private readonly maxRoboSpawnDelay: number = 2000.0
 
     private roboSpawnDelay: number = 0.0
 
@@ -26,16 +26,23 @@ export class Game extends Scene
     preload ()
     {
         this.load.image('seesaw', 'assets/seesaw.png')
+
         this.load.image('small_gun', 'assets/small_gun.png')
+        this.load.image('gatling_gun', 'assets/gatling_gun.png')
+
         this.load.image('bullet', 'assets/bullet.png')
+        this.load.image('small_bullet', 'assets/small_bullet.png')
+
         this.load.spritesheet('robo', 'assets/robo_sheet.png', {
             frameWidth: 64, frameHeight: 64,
         })
+
+        this.load.image('laser', 'assets/laser.png')
     }
 
     create ()
     {
-        this.spawnRectInner = new Phaser.Geom.Rectangle(0, 0, GAME_WIDTH, GAME_HEIGHT)
+        this.spawnRectInner = new Phaser.Geom.Rectangle(-10, -10, GAME_WIDTH + 20, GAME_HEIGHT + 20)
         this.spawnRectOuter = new Phaser.Geom.Rectangle(-50, -50, GAME_WIDTH + 100, GAME_HEIGHT + 100)
 
         this.anims.create({
@@ -67,6 +74,7 @@ export class Game extends Scene
         this.seesaw.on('turret_right_fired', this.onSeesawTurretRightFired, this)
 
         this.physics.add.overlap(this.bulletGroup, this.roboGroup, this.onBulletOverlapRobo, undefined, this)
+        this.physics.add.overlap(this.roboGroup, this.seesaw, this.onSeesawOverlapEnemy, undefined, this)
     }
 
     update(time: number, delta: number)
@@ -91,7 +99,7 @@ export class Game extends Scene
         }
     }
 
-    private onSeesawTurretLeftFired(x: number, y: number, rotation: number, rotVel: number, _projectile: Projectiles)
+    private onSeesawTurretLeftFired(x: number, y: number, rotation: number, rotVel: number, projectile: Projectiles)
     {
         const bullet: Bullet = this.bulletGroup.get()
         if (bullet)
@@ -99,11 +107,12 @@ export class Game extends Scene
             const r = rotation - Math.PI * 0.5
             let addVel = Math.max(rotVel, 0.0)
             addVel *= 1000.0
-            bullet.launch(x, y, r, addVel)
+            const textureKeys = ['bullet', 'small_bullet']
+            bullet.launch(x, y, r, addVel, textureKeys[projectile])
         }
     }
 
-    private onSeesawTurretRightFired(x: number, y: number, rotation: number, rotVel: number, _projectile: Projectiles)
+    private onSeesawTurretRightFired(x: number, y: number, rotation: number, rotVel: number, projectile: Projectiles)
     {
         const bullet = this.bulletGroup.get() as Bullet
         if (bullet)
@@ -111,7 +120,8 @@ export class Game extends Scene
             const r = rotation - Math.PI * 0.5
             let addVel = Math.min(rotVel, 0.0) * -1.0
             addVel *= 1000.0
-            bullet.launch(x, y, r, addVel)
+            const textureKeys = ['bullet', 'small_bullet']
+            bullet.launch(x, y, r, addVel, textureKeys[projectile])
         }
     }
 
@@ -119,7 +129,13 @@ export class Game extends Scene
     {
         const b: Bullet = bullet
         b.disableBody(true, true)
+
         const r: Robo = robo
-        r.disableBody(true, true)
+        r.takeDamage(b.damage)
+    }
+
+    private onSeesawOverlapEnemy(_seesaw: any, enemy: any)
+    {
+        (enemy as Robo).disableBody(true, true)
     }
 }

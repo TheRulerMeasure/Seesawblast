@@ -10,11 +10,6 @@ export default class Turret extends Phaser.GameObjects.Image
 
     private fireDelay: number = 0.0
 
-    constructor (scene: Phaser.Scene, x: number, y: number, sprite: string)
-    {
-        super(scene, x, y, sprite)
-    }
-
     public update(_time: number, delta: number)
     {
         if (this.fireDelay < this.maxFireDelay)

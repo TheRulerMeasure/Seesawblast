@@ -1,6 +1,8 @@
 import { Input } from 'phaser'
-import { GAME_HEIGHT, GAME_WIDTH, Projectiles } from '../constants/GameConst'
+import { GAME_HEIGHT, GAME_WIDTH, Projectiles, Turrets } from '../constants/GameConst'
 import Turret from './turrets/Turret'
+import SmallGun from './turrets/SmallGun'
+import GatlingGun from './turrets/GatlingGun'
 
 export default class Seesaw extends Phaser.GameObjects.Container
 {
@@ -45,8 +47,8 @@ export default class Seesaw extends Phaser.GameObjects.Container
 
         this.turretBase = scene.add.existing(this.addTurretBase(scene))
         this.add(this.turretBase)
-        this.turretLeft = scene.add.existing(new Turret(scene, this.turretLeftOffsetX, -5, 'small_gun'))
-        this.turretRight = scene.add.existing(new Turret(scene, this.turretRightOffsetX, -5, 'small_gun'))
+        this.turretLeft = scene.add.existing(new SmallGun(scene, this.turretLeftOffsetX, -5))
+        this.turretRight = scene.add.existing(new SmallGun(scene, this.turretRightOffsetX, -5))
         this.turretBase.add([ this.turretLeft, this.turretRight ])
 
         this.turretLeft.on('fired', this.onTurretLeftFired, this)
@@ -85,12 +87,58 @@ export default class Seesaw extends Phaser.GameObjects.Container
         }
     }
 
+    public setTurretLeft(turretType: Turrets)
+    {
+        this.turretLeft.destroy(true)
+        const x = this.turretLeftOffsetX
+        const y = -5
+        let turret: Turret
+        switch (turretType)
+        {
+            case Turrets.GATLING_GUN:
+                turret = this.scene.add.existing(new GatlingGun(this.scene, x, y))
+                break
+            default:
+                turret = this.scene.add.existing(new SmallGun(this.scene, x, y))
+                break
+        }
+        this.turretBase.add(turret)
+        turret.on('fired', this.onTurretLeftFired, this)
+        this.turretLeft = turret
+    }
+
+    public setTurretRight(turretType: Turrets)
+    {
+        this.turretRight.destroy(true)
+        const x = this.turretRightOffsetX
+        const y = -5
+        let turret: Turret
+        switch (turretType)
+        {
+            case Turrets.GATLING_GUN:
+                turret = this.scene.add.existing(new GatlingGun(this.scene, x, y))
+                break
+            default:
+                turret = this.scene.add.existing(new SmallGun(this.scene, x, y))
+                break
+        }
+        this.turretBase.add(turret)
+        turret.on('fired', this.onTurretRightFired, this)
+        this.turretRight = turret
+    }
+
     private addTurretBase(scene: Phaser.Scene)
     {
+        const maxAlpha = 0.7
+        const upAng = Math.PI * -0.5
+        const offsetY = -220
+
         return scene.make.container({
             x: 0, y: 0,
             children: [
                 scene.add.image(0, 0, 'seesaw'),
+                scene.add.image(this.turretLeftOffsetX, offsetY, 'laser').setRotation(upAng).setAlpha(maxAlpha, 0, maxAlpha, 0),
+                scene.add.image(this.turretRightOffsetX, offsetY, 'laser').setRotation(upAng).setAlpha(maxAlpha, 0, maxAlpha, 0),
             ],
         })
     }
