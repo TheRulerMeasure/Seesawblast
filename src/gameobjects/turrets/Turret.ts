@@ -2,7 +2,7 @@ import { Projectiles } from '../../constants/GameConst'
 
 export default class Turret extends Phaser.GameObjects.Image
 {
-    public projectileType: number = Projectiles.BULLET
+    public projectileType: Projectiles = Projectiles.BULLET
     public maxFireDelay: number = 250
     public maxForce: number = 2
 
