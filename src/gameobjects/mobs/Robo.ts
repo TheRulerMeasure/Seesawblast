@@ -1,4 +1,5 @@
 import { GAME_HEIGHT, GAME_WIDTH } from '../../constants/GameConst'
+import RoboConf from './RoboConf'
 
 export default class Robo extends Phaser.Physics.Arcade.Sprite
 {
@@ -10,17 +11,26 @@ export default class Robo extends Phaser.Physics.Arcade.Sprite
         if (this.health <= 0)
         {
             this.disableBody(true, true)
+            this.emit('died', this.x, this.y)
+            this.removeAllListeners('died')
         }
     }
 
-    public start(x: number, y: number, speed: number = 20.0, health: number = 75)
+    public start(x: number, y: number, health: number = 75, conf: RoboConf = new RoboConf())
     {
+        this.setSize(conf.sizeX, conf.sizeY)
+
         this.health = health
+
+        this.setTexture(conf.texture)
+        this.play(conf.anim)
         this.setFlipX(x > GAME_WIDTH * 0.5)
+
         this.enableBody(true, x, y, true, true)
+
         let vec = new Phaser.Math.Vector2(GAME_WIDTH * 0.5, GAME_HEIGHT * 0.5)
         vec = vec.subtract(new Phaser.Math.Vector2(x, y))
         vec = vec.normalize()
-        this.setVelocity(vec.x * speed, vec.y * speed)
+        this.setVelocity(vec.x * conf.speed, vec.y * conf.speed)
     }
 }

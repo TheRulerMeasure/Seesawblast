@@ -47,8 +47,8 @@ export default class Seesaw extends Phaser.GameObjects.Container
 
         this.turretBase = scene.add.existing(this.addTurretBase(scene))
         this.add(this.turretBase)
-        this.turretLeft = scene.add.existing(new SmallGun(scene, this.turretLeftOffsetX, -5))
-        this.turretRight = scene.add.existing(new SmallGun(scene, this.turretRightOffsetX, -5))
+        this.turretLeft = scene.add.existing(new GatlingGun(scene, this.turretLeftOffsetX, -5))
+        this.turretRight = scene.add.existing(new GatlingGun(scene, this.turretRightOffsetX, -5))
         this.turretBase.add([ this.turretLeft, this.turretRight ])
 
         this.turretLeft.on('fired', this.onTurretLeftFired, this)
@@ -89,6 +89,7 @@ export default class Seesaw extends Phaser.GameObjects.Container
 
     public setTurretLeft(turretType: Turrets)
     {
+        this.turretLeft.off('fired', this.onTurretLeftFired, this)
         this.turretLeft.destroy(true)
         const x = this.turretLeftOffsetX
         const y = -5
@@ -109,6 +110,7 @@ export default class Seesaw extends Phaser.GameObjects.Container
 
     public setTurretRight(turretType: Turrets)
     {
+        this.turretRight.off('fired', this.onTurretRightFired, this)
         this.turretRight.destroy(true)
         const x = this.turretRightOffsetX
         const y = -5
