@@ -4,7 +4,7 @@ import { GAME_HEIGHT, GAME_WIDTH, Projectiles } from '../constants/GameConst'
 import Bullet from '../gameobjects/projectiles/Bullet'
 import Robo from '../gameobjects/mobs/Robo'
 
-export class Game extends Scene
+export default class MainGame extends Scene
 {
     private seesaw: Seesaw
 
@@ -21,41 +21,13 @@ export class Game extends Scene
 
     public constructor ()
     {
-        super('Game')
-    }
-
-    preload ()
-    {
-        this.load.image('seesaw', 'assets/seesaw.png')
-
-        this.load.image('small_gun', 'assets/small_gun.png')
-        this.load.image('gatling_gun', 'assets/gatling_gun.png')
-
-        this.load.image('bullet', 'assets/bullet.png')
-        this.load.image('small_bullet', 'assets/small_bullet.png')
-
-        this.load.spritesheet('small_explosion', 'assets/small_explosion_sheet.png', { frameWidth: 24, frameHeight: 24 })
-        this.load.spritesheet('explosion', 'assets/explosion_sheet.png', { frameWidth: 128, frameHeight: 128 })
-        this.load.spritesheet('muzzle_flash', 'assets/muzzle_flash_sheet.png', { frameWidth: 32, frameHeight: 32 })
-
-        this.load.spritesheet('robo', 'assets/robo_sheet.png', { frameWidth: 64, frameHeight: 64 })
-
-        this.load.image('laser', 'assets/laser.png')
+        super({ key: 'MainGame', active: false })
     }
 
     create ()
     {
         this.spawnRectInner = new Phaser.Geom.Rectangle(-10, -10, GAME_WIDTH + 20, GAME_HEIGHT + 20)
         this.spawnRectOuter = new Phaser.Geom.Rectangle(-50, -50, GAME_WIDTH + 100, GAME_HEIGHT + 100)
-
-        this.anims.create({
-            key: 'robo_walk',
-            frames: this.anims.generateFrameNumbers('robo', { frames: [ 0, 1 ] }),
-            frameRate: 8,
-            repeat: -1,
-        })
-
-        this.createEffectAnims()
 
         this.bulletGroup = this.physics.add.group({
             classType: Bullet,
@@ -86,15 +58,9 @@ export class Game extends Scene
 
         this.physics.add.overlap(this.bulletGroup, this.roboGroup, this.onBulletOverlapRobo, undefined, this)
         this.physics.add.overlap(this.roboGroup, this.seesaw, this.onSeesawOverlapEnemy, undefined, this)
-
-        const keyboard = this.input.keyboard
-        if (keyboard)
-        {
-            keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.P).on(Phaser.Input.Keyboard.Events.UP, this.onPauseButtonReleased, this)
-        }
     }
 
-    update(time: number, delta: number)
+    update (time: number, delta: number)
     {
         this.seesaw.update(time, delta)
         this.roboSpawnDelay += delta
@@ -106,26 +72,7 @@ export class Game extends Scene
         }
     }
 
-    private createEffectAnims()
-    {
-        this.anims.create({
-            key: 'small_explosion_explode',
-            frames: this.anims.generateFrameNumbers('small_explosion', { frames: [ 0, 1, 2 ] }),
-            duration: 250,
-        })
-        this.anims.create({
-            key: 'explosion_explode',
-            frames: this.anims.generateFrameNumbers('explosion', { frames: [ 0, 1, 2, 3, 4, 5 ] }),
-            duration: 500,
-        })
-        this.anims.create({
-            key: 'muzzle_flash_flash',
-            frames: this.anims.generateFrameNumbers('muzzle_flash', { frames: [ 0, 1, 2 ] }),
-            duration: 300,
-        })
-    }
-
-    private putRoboAt(x: number, y: number)
+    private putRoboAt (x: number, y: number)
     {
         const robo: Robo = this.roboGroup.get()
         if (robo)
@@ -135,7 +82,7 @@ export class Game extends Scene
         }
     }
 
-    private putMuzzleFlashAt(x: number, y: number, rotation: number)
+    private putMuzzleFlashAt (x: number, y: number, rotation: number)
     {
         const muzzleFlash: Phaser.GameObjects.Sprite = this.explosionGroup.get(x, y, 'muzzle_flash')
         if (muzzleFlash)
@@ -152,7 +99,7 @@ export class Game extends Scene
         }
     }
 
-    private putExplosionAt(x: number, y: number, big: boolean = false)
+    private putExplosionAt (x: number, y: number, big: boolean = false)
     {
         const explosion: Phaser.GameObjects.Sprite = this.explosionGroup.get(x, y, big ? 'explosion' : 'small_explosion')
         if (explosion)
@@ -169,7 +116,7 @@ export class Game extends Scene
         }
     }
 
-    private onSeesawTurretLeftFired(x: number, y: number, rotation: number, rotVel: number, projectile: Projectiles)
+    private onSeesawTurretLeftFired (x: number, y: number, rotation: number, rotVel: number, projectile: Projectiles)
     {
         const rotationUp = rotation - Math.PI * 0.5
         const bullet: Bullet = this.bulletGroup.get()
@@ -185,7 +132,7 @@ export class Game extends Scene
         this.putMuzzleFlashAt(muzzleX, muzzleY, rotationUp)
     }
 
-    private onSeesawTurretRightFired(x: number, y: number, rotation: number, rotVel: number, projectile: Projectiles)
+    private onSeesawTurretRightFired (x: number, y: number, rotation: number, rotVel: number, projectile: Projectiles)
     {
         const rotationUp = rotation - Math.PI * 0.5
         const bullet = this.bulletGroup.get() as Bullet
@@ -201,7 +148,7 @@ export class Game extends Scene
         this.putMuzzleFlashAt(muzzleX, muzzleY, rotationUp)
     }
 
-    private onBulletOverlapRobo(bullet: any, robo: any)
+    private onBulletOverlapRobo (bullet: any, robo: any)
     {
         const b: Bullet = bullet
         this.putExplosionAt(b.x, b.y)
@@ -211,27 +158,15 @@ export class Game extends Scene
         r.takeDamage(b.damage)
     }
 
-    private onSeesawOverlapEnemy(_seesaw: any, enemy: any)
+    private onSeesawOverlapEnemy (_seesaw: any, enemy: any)
     {
         const robo: Robo = enemy
         robo.removeAllListeners('died')
         robo.disableBody(true, true)
     }
 
-    private onRoboDied(x: number, y: number)
+    private onRoboDied (x: number, y: number)
     {
         this.putExplosionAt(x, y, true)
-    }
-
-    private onPauseButtonReleased()
-    {
-        if (this.scene.isPaused())
-        {
-            this.scene.resume()
-        }
-        else
-        {
-            this.scene.pause()
-        }
     }
 }
