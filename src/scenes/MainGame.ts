@@ -70,7 +70,7 @@ export default class MainGame extends Scene
         this.seesaw.on('turret_left_fired', this.onSeesawTurretLeftFired, this)
         this.seesaw.on('turret_right_fired', this.onSeesawTurretRightFired, this)
 
-        this.levelProgBar.on('reachedNextLevel', this.onLevelProgReachedNextLevel, this)
+        this.levelProgBar.on('reached_next_level', this.onLevelProgReachedNextLevel, this)
 
         this.physics.add.overlap(this.bulletGroup, this.roboGroup, this.onBulletOverlapRobo, undefined, this)
         this.physics.add.overlap(this.roboGroup, this.seesaw, this.onSeesawOverlapEnemy, undefined, this)

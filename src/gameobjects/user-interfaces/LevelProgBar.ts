@@ -30,12 +30,6 @@ export default class LevelProgBar extends Phaser.GameObjects.Image
         const mask = progUnder.createBitmapMask();
         progLayer.setMask(mask)
         this.scrap = progLayer.add(scene.make.sprite({ x: PROG_POS_X1, y, key: 'scrap_progress' }))
-
-        scene.tweens.add({
-            targets: this.scrap,
-            
-            persist: true,
-        })
     }
 
     update (_time: number, delta: number)
@@ -69,7 +63,7 @@ export default class LevelProgBar extends Phaser.GameObjects.Image
         this.scrap.setX(x)
         if (this.currentProgress >= this.nextLevelProgress)
         {
-            this.emit('reachedNextLevel')
+            this.emit('reached_next_level')
         }
     }
 
@@ -79,7 +73,7 @@ export default class LevelProgBar extends Phaser.GameObjects.Image
         this.nextLevelProgress = nextLevelProgress
         if (this.currentProgress >= this.nextLevelProgress)
         {
-            this.emit('reachedNextLevel')
+            this.emit('reached_next_level')
         }
     }
 }

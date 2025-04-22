@@ -3,6 +3,8 @@ import { GAME_HEIGHT, GAME_WIDTH } from "../constants/GameConst";
 
 export default class GameStage extends Scene
 {
+    private upgradePanels: Phaser.GameObjects.NineSlice[]
+
     private upgradeLabel: Phaser.GameObjects.BitmapText
 
     constructor ()
@@ -18,6 +20,14 @@ export default class GameStage extends Scene
 
     create ()
     {
+        this.upgradePanels = [
+            this.add.nineslice(GAME_WIDTH * 0.5, GAME_HEIGHT * 0.5, 'metal_patch', undefined, 200, 300, 32, 32, 32, 32),
+        ]
+        for (let i = 0; i < this.upgradePanels.length; i++)
+        {
+            this.upgradePanels[i].setVisible(false)
+        }
+
         this.upgradeLabel = this.add.bitmapText(GAME_WIDTH * 0.5, GAME_HEIGHT * 0.5, 'mini_font', 'Level Up!')
         this.upgradeLabel.setVisible(false)
 
@@ -33,6 +43,10 @@ export default class GameStage extends Scene
     {
         this.scene.pause('MainGame')
         this.upgradeLabel.setVisible(true)
+        for (let i = 0; i < this.upgradePanels.length; i++)
+        {
+            this.upgradePanels[i].setVisible(true)
+        }
     }
 
     private onPauseButtonReleased ()

@@ -36,6 +36,7 @@ export default class Preloader extends Scene
         this.load.image('level_progbar_over', 'user-interfaces/level_progbar_over.png')
         this.load.image('level_progbar_under', 'user-interfaces/level_progbar_under.png')
         this.load.image('scrap_progress', 'user-interfaces/scrap_progress.png')
+        this.load.image('metal_patch', 'user-interfaces/metal_patch.png')
 
         this.load.spritesheet('scrap', 'props/scrap_sheet.png', { frameWidth: 48, frameHeight: 48 })
 
