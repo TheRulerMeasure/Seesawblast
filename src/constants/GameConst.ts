@@ -13,3 +13,11 @@ export enum Turrets
     SMALL_GUN,
     GATLING_GUN,
 }
+
+export const PROJECTILE_DEPTH = 10
+export const SEESAW_DEPTH = 100
+export const MOB_DEPTH = 120
+export const EXPLOSION_DEPTH = 150
+export const SCRAP_DEPTH = 180
+export const LVL_PROGBAR_PROG_DEPTH = 201
+export const LVL_PROGBAR_OVER_DEPTH = 202

@@ -1,4 +1,4 @@
-import { Scene } from "phaser";
+import { Scene } from 'phaser';
 
 export default class Boot extends Scene
 {
@@ -9,7 +9,7 @@ export default class Boot extends Scene
 
     preload ()
     {
-        this.load.image('loading_label', 'assets/loading_label.png')
+        this.load.image('loading_label', 'assets/textures/user-interfaces/loading_label.png')
     }
 
     create ()

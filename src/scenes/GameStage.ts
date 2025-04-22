@@ -15,7 +15,7 @@ export default class GameStage extends Scene
 
     create ()
     {
-        this.add.image(300, 400, 'bullet')
+        this.add.bitmapText(100, 100, 'mini_font', 'Hello, World!!')
 
         const keyboard = this.input.keyboard
         if (keyboard)
