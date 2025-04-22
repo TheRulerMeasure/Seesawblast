@@ -5,6 +5,8 @@ import Bullet from '../gameobjects/projectiles/Bullet'
 import Robo from '../gameobjects/mobs/Robo'
 import LevelProgBar from '../gameobjects/user-interfaces/LevelProgBar'
 import ScrapCollectable from '../gameobjects/effects/ScrapCollectable'
+import RoboConf from '../gameobjects/mobs/RoboConf'
+import GameStage from './GameStage'
 
 export default class MainGame extends Scene
 {
@@ -68,6 +70,8 @@ export default class MainGame extends Scene
         this.seesaw.on('turret_left_fired', this.onSeesawTurretLeftFired, this)
         this.seesaw.on('turret_right_fired', this.onSeesawTurretRightFired, this)
 
+        this.levelProgBar.on('reachedNextLevel', this.onLevelProgReachedNextLevel, this)
+
         this.physics.add.overlap(this.bulletGroup, this.roboGroup, this.onBulletOverlapRobo, undefined, this)
         this.physics.add.overlap(this.roboGroup, this.seesaw, this.onSeesawOverlapEnemy, undefined, this)
     }
@@ -85,13 +89,21 @@ export default class MainGame extends Scene
         this.levelProgBar.update(time, delta)
     }
 
+    public updateLevelProgress ()
+    {
+        this.levelProgBar.updateAndSetNextLevel(1000)
+    }
+
     private putRoboAt (x: number, y: number)
     {
         const robo: Robo = this.roboGroup.get()
         if (robo)
         {
             robo.setDepth(MOB_DEPTH)
-            robo.start(x, y)
+            const conf = new RoboConf()
+            conf.minScraps = 2
+            conf.maxScraps = 4
+            robo.start(x, y, 75, conf)
             robo.once('died', this.onRoboDied, this)
         }
     }
@@ -130,13 +142,13 @@ export default class MainGame extends Scene
         }
     }
 
-    private putScrapAt(x: number, y: number)
+    private putScrapAt(x: number, y: number, amount: number)
     {
         const scrap: ScrapCollectable = this.scrapGroup.get()
         if (scrap)
         {
             scrap.setDepth(SCRAP_DEPTH)
-            scrap.start(x, y, this.tweens)
+            scrap.start(x, y, this.tweens, amount)
             scrap.once('get_collected', this.onScrapCollected, this)
         }
     }
@@ -192,17 +204,39 @@ export default class MainGame extends Scene
         robo.disableBody(true, true)
     }
 
-    private onRoboDied (x: number, y: number)
+    private onRoboDied (x: number, y: number, scraps: number)
     {
-        for (let i = 0; i < Phaser.Math.Between(2, 5); i++)
+        if (scraps < 10)
         {
-            this.putScrapAt(x, y)
+            let givenAmount = Phaser.Math.Between(1, 3)
+            this.putScrapAt(x, y, Math.min(givenAmount, scraps))
+            while (givenAmount < scraps)
+            {
+                this.putScrapAt(x, y, Math.min(givenAmount, scraps))
+                givenAmount += Phaser.Math.Between(1, 3)
+            }
+        }
+        else
+        {
+            let givenAmount = Phaser.Math.Between(4, 8)
+            this.putScrapAt(x, y, Math.min(givenAmount, scraps))
+            while (givenAmount < scraps)
+            {
+                this.putScrapAt(x, y, Math.min(givenAmount, scraps))
+                givenAmount += Phaser.Math.Between(4, 8)
+            }
         }
         this.putExplosionAt(x, y, true)
     }
 
-    private onScrapCollected ()
+    private onScrapCollected (amount: number)
     {
-        console.log('got a scrap!')
+        this.levelProgBar.addProgress(amount)
+    }
+
+    private onLevelProgReachedNextLevel()
+    {
+        const gameStage = this.scene.get('GameStage') as GameStage
+        gameStage.initUpgrade()
     }
 }

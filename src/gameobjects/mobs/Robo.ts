@@ -5,13 +5,15 @@ export default class Robo extends Phaser.Physics.Arcade.Sprite
 {
     public health: number = 75
 
+    public scraps: number = 2
+
     public takeDamage(damage: number)
     {
         this.health -= damage
         if (this.health <= 0)
         {
             this.disableBody(true, true)
-            this.emit('died', this.x, this.y)
+            this.emit('died', this.x, this.y, this.scraps)
             this.removeAllListeners('died')
         }
     }
@@ -21,6 +23,7 @@ export default class Robo extends Phaser.Physics.Arcade.Sprite
         this.setSize(conf.sizeX, conf.sizeY)
 
         this.health = health
+        this.scraps = Phaser.Math.Between(conf.minScraps, conf.maxScraps)
 
         this.setTexture(conf.texture)
         this.play(conf.anim)

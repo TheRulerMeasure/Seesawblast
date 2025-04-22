@@ -1,7 +1,10 @@
 import { Scene } from "phaser";
+import { GAME_HEIGHT, GAME_WIDTH } from "../constants/GameConst";
 
 export default class GameStage extends Scene
 {
+    private upgradeLabel: Phaser.GameObjects.BitmapText
+
     constructor ()
     {
         super({ key: 'GameStage', active: false })
@@ -15,7 +18,8 @@ export default class GameStage extends Scene
 
     create ()
     {
-        this.add.bitmapText(100, 100, 'mini_font', 'Hello, World!!')
+        this.upgradeLabel = this.add.bitmapText(GAME_WIDTH * 0.5, GAME_HEIGHT * 0.5, 'mini_font', 'Level Up!')
+        this.upgradeLabel.setVisible(false)
 
         const keyboard = this.input.keyboard
         if (keyboard)
@@ -25,16 +29,15 @@ export default class GameStage extends Scene
         }
     }
 
+    public initUpgrade()
+    {
+        this.scene.pause('MainGame')
+        this.upgradeLabel.setVisible(true)
+    }
+
     private onPauseButtonReleased ()
     {
-        if (this.scene.isPaused('MainGame'))
-        {
-            this.scene.resume('MainGame')
-        }
-        else
-        {
-            this.scene.pause('MainGame')
-        }
+
     }
 
     private onQuitButtonReleased()

@@ -2,10 +2,14 @@ import { GAME_HEIGHT, GAME_WIDTH } from "../../constants/GameConst"
 
 export default class ScrapCollectable extends Phaser.GameObjects.Image
 {
-    public start(x: number, y: number, tween: Phaser.Tweens.TweenManager)
+    public amount: number = 1
+
+    public start(x: number, y: number, tween: Phaser.Tweens.TweenManager, amount: number)
     {
-        this.x = x
-        this.y = y
+        this.amount = amount
+
+        this.setScale(amount < 5 ? 0.6 : 1.0)
+        this.setPosition(x, y)
 
         this.setFrame(Phaser.Math.Between(0, 3))
 
@@ -46,7 +50,7 @@ export default class ScrapCollectable extends Phaser.GameObjects.Image
                 },
             ],
             onComplete: () => {
-                this.emit('get_collected')
+                this.emit('get_collected', this.amount)
                 this.setActive(false)
                 this.setVisible(false)
             },
