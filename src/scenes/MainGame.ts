@@ -197,11 +197,13 @@ export default class MainGame extends Scene
         r.takeDamage(b.damage)
     }
 
-    private onSeesawOverlapEnemy (_seesaw: any, enemy: any)
+    private onSeesawOverlapEnemy (seesaw: any, enemy: any)
     {
         const robo: Robo = enemy
         robo.removeAllListeners('died')
         robo.disableBody(true, true)
+        const s: Seesaw = seesaw
+        s.TakeDamage(1)
     }
 
     private onRoboDied (x: number, y: number, scraps: number)

@@ -3,9 +3,12 @@ import { GAME_HEIGHT, GAME_WIDTH, Projectiles, Turrets } from '../constants/Game
 import Turret from './turrets/Turret'
 import SmallGun from './turrets/SmallGun'
 import GatlingGun from './turrets/GatlingGun'
+import HeartContainer from './user-interfaces/HeartContainer'
 
 export default class Seesaw extends Phaser.GameObjects.Container
 {
+    public health: number = 3
+
     public friction: number = 0.8
     public maxRotationVelocity: number = 0.3
 
@@ -21,6 +24,7 @@ export default class Seesaw extends Phaser.GameObjects.Container
     private rotationVelocity: number = 0.0
 
     private turretBase: Phaser.GameObjects.Container
+    private heartContainer: HeartContainer
 
     constructor (scene: Phaser.Scene)
     {
@@ -50,6 +54,9 @@ export default class Seesaw extends Phaser.GameObjects.Container
         this.turretLeft = scene.add.existing(new GatlingGun(scene, this.turretLeftOffsetX, -5))
         this.turretRight = scene.add.existing(new GatlingGun(scene, this.turretRightOffsetX, -5))
         this.turretBase.add([ this.turretLeft, this.turretRight ])
+
+        this.heartContainer = scene.add.existing(new HeartContainer(scene, 0, 64))
+        this.add(this.heartContainer)
 
         this.turretLeft.on('fired', this.onTurretLeftFired, this)
         this.turretRight.on('fired', this.onTurretRightFired, this)
@@ -127,6 +134,12 @@ export default class Seesaw extends Phaser.GameObjects.Container
         this.turretBase.add(turret)
         turret.on('fired', this.onTurretRightFired, this)
         this.turretRight = turret
+    }
+
+    public TakeDamage(damage: number)
+    {
+        this.health -= damage
+        this.heartContainer.setHealthPoint(this.health)
     }
 
     private addTurretBase(scene: Phaser.Scene)
