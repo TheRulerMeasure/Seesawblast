@@ -5,10 +5,15 @@ export class RapidFireLeft extends UpgradeCardConf
     constructor ()
     {
         super()
-        this.name = 'RapidFire(Left)'
+        this.name = [
+            'RapidFire',
+            '(Left)',
+        ]
         this.descriptions = [
-            'Increase the rate of fire',
-            'of the Left turret.',
+            'Increase the',
+            'rate of fire',
+            'of the Left',
+            'turret.'
         ]
     }
 }
@@ -18,10 +23,15 @@ export class RapidFireRight extends UpgradeCardConf
     constructor ()
     {
         super()
-        this.name = 'RapidFire(Right)'
+        this.name = [
+            'RapidFire',
+            '(Right)',
+        ]
         this.descriptions = [
-            'Increase the rate of fire',
-            'of the Right turret.',
+            'Increase the',
+            'rate of fire',
+            'of the right',
+            'turret.'
         ]
     }
 }
@@ -31,10 +41,15 @@ export class PowerThePowerUp extends UpgradeCardConf
     constructor ()
     {
         super()
-        this.name = 'Power the PowerUp'
+        this.name = [
+            'Power the',
+            'PowerUp',
+        ]
         this.descriptions = [
-            'Special turrets',
-            'do 2x more damage.',
+            'Special',
+            'turrets',
+            'do 2x more',
+            'damage.'
         ]
     }
 }
@@ -44,10 +59,15 @@ export class BigGunLover extends UpgradeCardConf
     constructor ()
     {
         super()
-        this.name = 'Big Guns Lover'
+        this.name = [
+            'Big Guns',
+            'Lover',
+        ]
         this.descriptions = [
-            'Increase the duration of',
-            'Special turrets.',
+            'Increase the',
+            'duration of',
+            'Special',
+            'turrets.',
         ]
     }
 }
@@ -57,7 +77,10 @@ export class MoreDamageLeft extends UpgradeCardConf
     constructor ()
     {
         super()
-        this.name = 'More Damage(Left)'
+        this.name = [
+            'More Damage',
+            '(Left)',
+        ]
         this.descriptions = [
             'Increase the damage',
             'of the Left turret.',
@@ -104,3 +127,12 @@ export class BreathControl extends UpgradeCardConf
         ]
     }
 }
+
+const getUpgradeCardConfs = (): UpgradeCardConf[] => ([
+    new RapidFireLeft(),
+    new RapidFireRight(),
+    new PowerThePowerUp(),
+    new BigGunLover(),
+])
+
+export default getUpgradeCardConfs

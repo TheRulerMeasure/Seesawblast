@@ -25,3 +25,4 @@ export const LVL_PROGBAR_OVER_DEPTH = 202
 export const LEVEL_UP_LABEL_DEPTH = 1
 export const UPGRADE_CARD_PATCH_DEPTH = 2
 export const UPGRADE_CARD_NAME_DEPTH = 3
+export const UPGRADE_CARD_DESC_DEPTH = 4

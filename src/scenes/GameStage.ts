@@ -2,9 +2,13 @@ import { Scene } from "phaser";
 import { GAME_HEIGHT, GAME_WIDTH, LEVEL_UP_LABEL_DEPTH } from "../constants/GameConst";
 import UpgradeCard from "../gameobjects/user-interfaces/upgrades/UpgradeCard";
 import MainGame from "./MainGame";
+import UpgradeCardConf from "../gameobjects/user-interfaces/upgrades/UpgradeCardConf";
+import getUpgradeCardConfs from "../gameobjects/user-interfaces/upgrades/UpgradeCardCard";
 
 export default class GameStage extends Scene
 {
+    private upgradeCardConfs: UpgradeCardConf[]
+
     private upgradeCards: UpgradeCard[]
 
     private levelUpLabel: Phaser.GameObjects.BitmapText
@@ -22,6 +26,8 @@ export default class GameStage extends Scene
 
     create ()
     {
+        this.upgradeCardConfs = getUpgradeCardConfs()
+
         this.upgradeCards = [
             this.add.existing(new UpgradeCard(this, 0)).on('upgrade_selected', this.onUpgradeCardGetSelected, this),
             this.add.existing(new UpgradeCard(this, 1)).on('upgrade_selected', this.onUpgradeCardGetSelected, this),
@@ -43,14 +49,16 @@ export default class GameStage extends Scene
     public initUpgrade()
     {
         this.scene.pause('MainGame')
+
         this.levelUpLabel.setVisible(true)
-        for (let i = 0; i < this.upgradeCards.length; i++)
+        const nums = this.getRandDiffValues(3, this.upgradeCardConfs.length)
+        for (let i = 0; i < nums.length; i++)
         {
-            this.upgradeCards[i].start(this.tweens)
+            this.upgradeCards[i].start(this.tweens, this.upgradeCardConfs[nums[i]])
         }
     }
 
-    private onPauseButtonReleased ()
+    private onPauseButtonReleased()
     {
 
     }
@@ -72,5 +80,35 @@ export default class GameStage extends Scene
         }
         const mainGame = this.scene.get('MainGame') as MainGame
         mainGame.updateLevelProgress()
+    }
+
+    private getRandDiffValues(amount: number, vMax: number): number[]
+    {
+        if (amount > vMax)
+        {
+            return []
+        }
+        let prevN = 0
+        let maxN = vMax - amount
+        let nums: number[] = []
+        while (true)
+        {
+            const n = Phaser.Math.Between(prevN, maxN)
+            if (n >= maxN)
+            {
+                for (let i = maxN; i < vMax; i++)
+                {
+                    nums.push(i)
+                }
+                return nums
+            }
+            nums.push(n)
+            if (nums.length >= amount)
+            {
+                return nums
+            }
+            prevN = n + 1
+            maxN++
+        }
     }
 }
