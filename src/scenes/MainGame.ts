@@ -91,7 +91,7 @@ export default class MainGame extends Scene
 
     public updateLevelProgress ()
     {
-        this.levelProgBar.updateAndSetNextLevel(1000)
+        this.levelProgBar.updateAndSetNextLevel(150)
     }
 
     private putRoboAt (x: number, y: number)
@@ -101,8 +101,8 @@ export default class MainGame extends Scene
         {
             robo.setDepth(MOB_DEPTH)
             const conf = new RoboConf()
-            conf.minScraps = 2
-            conf.maxScraps = 4
+            conf.minScraps = 5
+            conf.maxScraps = 15
             robo.start(x, y, 75, conf)
             robo.once('died', this.onRoboDied, this)
         }

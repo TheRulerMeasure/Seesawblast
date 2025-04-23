@@ -1,11 +1,13 @@
 import { Scene } from "phaser";
-import { GAME_HEIGHT, GAME_WIDTH } from "../constants/GameConst";
+import { GAME_HEIGHT, GAME_WIDTH, LEVEL_UP_LABEL_DEPTH } from "../constants/GameConst";
+import UpgradeCard from "../gameobjects/user-interfaces/upgrades/UpgradeCard";
+import MainGame from "./MainGame";
 
 export default class GameStage extends Scene
 {
-    private upgradePanels: Phaser.GameObjects.NineSlice[]
+    private upgradeCards: UpgradeCard[]
 
-    private upgradeLabel: Phaser.GameObjects.BitmapText
+    private levelUpLabel: Phaser.GameObjects.BitmapText
 
     constructor ()
     {
@@ -20,16 +22,15 @@ export default class GameStage extends Scene
 
     create ()
     {
-        this.upgradePanels = [
-            this.add.nineslice(GAME_WIDTH * 0.5, GAME_HEIGHT * 0.5, 'metal_patch', undefined, 200, 300, 32, 32, 32, 32),
+        this.upgradeCards = [
+            this.add.existing(new UpgradeCard(this, 0)).on('upgrade_selected', this.onUpgradeCardGetSelected, this),
+            this.add.existing(new UpgradeCard(this, 1)).on('upgrade_selected', this.onUpgradeCardGetSelected, this),
+            this.add.existing(new UpgradeCard(this, 2)).on('upgrade_selected', this.onUpgradeCardGetSelected, this),
         ]
-        for (let i = 0; i < this.upgradePanels.length; i++)
-        {
-            this.upgradePanels[i].setVisible(false)
-        }
 
-        this.upgradeLabel = this.add.bitmapText(GAME_WIDTH * 0.5, GAME_HEIGHT * 0.5, 'mini_font', 'Level Up!')
-        this.upgradeLabel.setVisible(false)
+        this.levelUpLabel = this.add.bitmapText(GAME_WIDTH * 0.5, GAME_HEIGHT * 0.5, 'mini_font', 'Level Up!')
+        this.levelUpLabel.setDepth(LEVEL_UP_LABEL_DEPTH)
+        this.levelUpLabel.setVisible(false)
 
         const keyboard = this.input.keyboard
         if (keyboard)
@@ -42,10 +43,10 @@ export default class GameStage extends Scene
     public initUpgrade()
     {
         this.scene.pause('MainGame')
-        this.upgradeLabel.setVisible(true)
-        for (let i = 0; i < this.upgradePanels.length; i++)
+        this.levelUpLabel.setVisible(true)
+        for (let i = 0; i < this.upgradeCards.length; i++)
         {
-            this.upgradePanels[i].setVisible(true)
+            this.upgradeCards[i].start(this.tweens)
         }
     }
 
@@ -58,5 +59,18 @@ export default class GameStage extends Scene
     {
         this.scene.stop('MainGame')
         this.scene.start('MainMenu')
+    }
+
+    private onUpgradeCardGetSelected(cardIndex: number)
+    {
+        this.levelUpLabel.setVisible(false)
+        console.log(`selected upgrade = ${cardIndex}`)
+        this.scene.resume('MainGame')
+        for (let i = 0; i < this.upgradeCards.length; i++)
+        {
+            this.upgradeCards[i].stop()
+        }
+        const mainGame = this.scene.get('MainGame') as MainGame
+        mainGame.updateLevelProgress()
     }
 }

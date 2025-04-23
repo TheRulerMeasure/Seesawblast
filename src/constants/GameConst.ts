@@ -21,3 +21,7 @@ export const EXPLOSION_DEPTH = 150
 export const SCRAP_DEPTH = 180
 export const LVL_PROGBAR_PROG_DEPTH = 201
 export const LVL_PROGBAR_OVER_DEPTH = 202
+
+export const LEVEL_UP_LABEL_DEPTH = 1
+export const UPGRADE_CARD_PATCH_DEPTH = 2
+export const UPGRADE_CARD_NAME_DEPTH = 3

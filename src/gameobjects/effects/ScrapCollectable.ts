@@ -30,7 +30,7 @@ export default class ScrapCollectable extends Phaser.GameObjects.Image
         const target2X = GAME_WIDTH * 0.5
         const target2Y = GAME_HEIGHT * 0.5
         const firstDuration = 800 + Math.random() * 400
-        tween.chain({
+        const chain = tween.chain({
             targets: this,
             persist: false,
             tweens: [
@@ -49,11 +49,14 @@ export default class ScrapCollectable extends Phaser.GameObjects.Image
                     duration: 500,
                 },
             ],
-            onComplete: () => {
-                this.emit('get_collected', this.amount)
-                this.setActive(false)
-                this.setVisible(false)
-            },
         })
+        chain.once(Phaser.Tweens.Events.TWEEN_COMPLETE, this.onTweenDone, this)
+    }
+
+    private onTweenDone()
+    {
+        this.emit('get_collected', this.amount)
+        this.setActive(false)
+        this.setVisible(false)
     }
 }

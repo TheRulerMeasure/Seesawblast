@@ -57,10 +57,12 @@ export default class LevelProgBar extends Phaser.GameObjects.Image
         this.tintTime = 500
 
         this.currentProgress += amount
+
         const prog = this.currentProgress - this.prevLevelProgress
         const maxProg = this.nextLevelProgress - this.prevLevelProgress
         const x = Phaser.Math.Interpolation.Linear([PROG_POS_X1, PROG_POS_X2], prog / maxProg)
         this.scrap.setX(x)
+
         if (this.currentProgress >= this.nextLevelProgress)
         {
             this.emit('reached_next_level')
@@ -71,6 +73,12 @@ export default class LevelProgBar extends Phaser.GameObjects.Image
     {
         this.prevLevelProgress = this.nextLevelProgress
         this.nextLevelProgress = nextLevelProgress
+
+        const prog = this.currentProgress - this.prevLevelProgress
+        const maxProg = this.nextLevelProgress - this.prevLevelProgress
+        const x = Phaser.Math.Interpolation.Linear([PROG_POS_X1, PROG_POS_X2], prog / maxProg)
+        this.scrap.setX(x)
+
         if (this.currentProgress >= this.nextLevelProgress)
         {
             this.emit('reached_next_level')
