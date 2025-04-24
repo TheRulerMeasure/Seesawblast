@@ -70,6 +70,11 @@ export default class UpgradeCard extends Phaser.GameObjects.NineSlice
 
     public stop()
     {
+        const [ x, y ] = [ GAME_WIDTH * 0.5, GAME_HEIGHT + 500 ]
+        this.setPosition(x, y)
+        this.cardNameText.setPosition(x, y - CARD_HEIGHT * 0.5 + 36)
+        this.cardDescriptionText.setPosition(x - CARD_WIDTH * 0.45, y - CARD_HEIGHT * 0.15)
+
         this.removeInteractive()
         this.setVisible(false)
         this.cardNameText.setVisible(false)

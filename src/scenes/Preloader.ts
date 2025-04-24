@@ -18,10 +18,15 @@ export default class Preloader extends Scene
         this.load.setPath('assets/textures/')
 
         this.load.image('seesaw', 'weapons/seesaw.png')
+        this.load.image('seesaw_base', 'weapons/seesaw_base.png')
 
         this.load.image('small_gun', 'weapons/small_gun.png')
         this.load.image('gatling_gun', 'weapons/gatling_gun.png')
         this.load.image('laser', 'weapons/laser.png')
+
+        this.load.image('weapon_crate', 'weapons/weapon_crate.png')
+
+        this.load.image('gatling_gun_icon', 'user-interfaces/weapon-icons/gatling_gun_icon.png')
 
         this.load.image('bullet', 'projectiles/bullet.png')
         this.load.image('small_bullet', 'projectiles/small_bullet.png')

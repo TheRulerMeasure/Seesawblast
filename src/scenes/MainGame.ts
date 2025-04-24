@@ -1,12 +1,13 @@
 import { Scene } from 'phaser'
 import Seesaw from '../gameobjects/Seesaw'
-import { EXPLOSION_DEPTH, GAME_HEIGHT, GAME_WIDTH, MOB_DEPTH, PROJECTILE_DEPTH, Projectiles, SCRAP_DEPTH, SEESAW_DEPTH } from '../constants/GameConst'
+import { EXPLOSION_DEPTH, GAME_HEIGHT, GAME_WIDTH, MOB_DEPTH, PROJECTILE_DEPTH, Projectiles, SCRAP_DEPTH, Turrets, WEAPON_CRATE_DEPTH } from '../constants/GameConst'
 import Bullet from '../gameobjects/projectiles/Bullet'
 import Robo from '../gameobjects/mobs/Robo'
 import LevelProgBar from '../gameobjects/user-interfaces/LevelProgBar'
 import ScrapCollectable from '../gameobjects/effects/ScrapCollectable'
 import RoboConf from '../gameobjects/mobs/RoboConf'
 import GameStage from './GameStage'
+import WeaponCrate from '../gameobjects/powerups/WeaponCrate'
 
 export default class MainGame extends Scene
 {
@@ -14,15 +15,21 @@ export default class MainGame extends Scene
 
     private bulletGroup: Phaser.Physics.Arcade.Group
     private roboGroup: Phaser.Physics.Arcade.Group
+    private weaponCrateGroup: Phaser.Physics.Arcade.Group
+
     private explosionGroup: Phaser.GameObjects.Group
+
     private scrapGroup: Phaser.GameObjects.Group
 
     private levelProgBar: LevelProgBar
 
     private readonly maxRoboSpawnDelay: number = 2000.0
+    private readonly maxWeaponCrateSpawnDelay: number = 24000.0
 
     private roboSpawnDelay: number = 0.0
     private roboSpawnCount: number = 0
+
+    private weaponCrateSpawnDelay: number = 0.0
 
     private spawnRectInner: Phaser.Geom.Rectangle
     private spawnRectOuter: Phaser.Geom.Rectangle
@@ -50,6 +57,12 @@ export default class MainGame extends Scene
             runChildUpdate: true,
         })
 
+        this.weaponCrateGroup = this.physics.add.group({
+            classType: WeaponCrate,
+            maxSize: 10,
+            runChildUpdate: true,
+        })
+
         this.explosionGroup = this.add.group({
             classType: Phaser.GameObjects.Sprite,
             defaultKey: 'small_explosion',
@@ -62,9 +75,8 @@ export default class MainGame extends Scene
             defaultFrame: 0,
             maxSize: 200,
         })
-
-        this.seesaw = this.add.existing(new Seesaw(this))
-        this.seesaw.setDepth(SEESAW_DEPTH)
+        
+        this.seesaw = new Seesaw(this)
 
         this.levelProgBar = this.add.existing(new LevelProgBar(this))
 
@@ -74,16 +86,16 @@ export default class MainGame extends Scene
         this.levelProgBar.on('reached_next_level', this.onLevelProgReachedNextLevel, this)
 
         this.physics.add.overlap(this.bulletGroup, this.roboGroup, this.onBulletOverlapRobo, undefined, this)
+        this.physics.add.overlap(this.bulletGroup, this.weaponCrateGroup, this.onBulletOverlapWeaponCrate, undefined, this)
         this.physics.add.overlap(this.roboGroup, this.seesaw, this.onSeesawOverlapEnemy, undefined, this)
     }
 
     update (time: number, delta: number)
     {
         this.seesaw.update(time, delta)
-        if (this.roboSpawnCount < 10)
-        {
-            this.roboSpawnDelay += delta
-        }
+
+        this.roboSpawnDelay += delta
+
         if (this.roboSpawnDelay >= this.maxRoboSpawnDelay)
         {
             const point = Phaser.Geom.Rectangle.RandomOutside(this.spawnRectOuter, this.spawnRectInner)
@@ -91,6 +103,15 @@ export default class MainGame extends Scene
             this.roboSpawnDelay = 0.0
             this.roboSpawnCount++
         }
+
+        this.weaponCrateSpawnDelay += delta
+
+        if (this.weaponCrateSpawnDelay >= this.maxWeaponCrateSpawnDelay)
+        {
+            this.putWeaponCrates()
+            this.weaponCrateSpawnDelay = 0.0
+        }
+
         this.levelProgBar.update(time, delta)
     }
 
@@ -102,6 +123,53 @@ export default class MainGame extends Scene
     public processUpgrade()
     {
 
+    }
+
+    public attachNewGunLeft()
+    {
+        this.seesaw.setTurretLeft(Turrets.GATLING_GUN)
+    }
+
+    public attachNewGunRight()
+    {
+        this.seesaw.setTurretRight(Turrets.GATLING_GUN)
+    }
+
+    private putWeaponCrates()
+    {
+        const topLeftBottomRight = Math.random() > 0.5
+        if (topLeftBottomRight)
+        {
+            this.putWeaponCrateAt(GAME_WIDTH * 0.15, GAME_HEIGHT * 0.15)
+            this.putWeaponCrateAt(GAME_WIDTH * 0.85, GAME_HEIGHT * 0.85)
+        }
+        else
+        {
+            this.putWeaponCrateAt(GAME_WIDTH * 0.85, GAME_HEIGHT * 0.15)
+            this.putWeaponCrateAt(GAME_WIDTH * 0.15, GAME_HEIGHT * 0.85)
+        }
+    }
+
+    private putWeaponCrateAt(x: number, y: number)
+    {
+        const weaponCrate: WeaponCrate = this.weaponCrateGroup.get()
+        if (weaponCrate)
+        {
+            weaponCrate.setDepth(WEAPON_CRATE_DEPTH)
+            const horizontalMovement = Math.random() > 0.5
+            let velX = 0.0
+            let velY = 0.0
+            if (horizontalMovement)
+            {
+                velX = x > GAME_WIDTH * 0.5 ? -50 : 50
+            }
+            else
+            {
+                velY = y > GAME_HEIGHT * 0.5 ? -50 : 50
+            }
+            weaponCrate.start(x, y, velX, velY)
+            weaponCrate.once('died', this.onWeaponCrateDied, this)
+        }
     }
 
     private putRoboAt(x: number, y: number)
@@ -205,6 +273,16 @@ export default class MainGame extends Scene
         r.takeDamage(b.damage)
     }
 
+    private onBulletOverlapWeaponCrate(bullet: any, weaponCrate: any)
+    {
+        const b: Bullet = bullet
+        this.putExplosionAt(b.x, b.y)
+        b.disableBody(true, true)
+
+        const wp: WeaponCrate = weaponCrate
+        wp.takeDamage(b.damage)
+    }
+
     private onSeesawOverlapEnemy(seesaw: any, enemy: any)
     {
         const robo: Robo = enemy
@@ -241,6 +319,12 @@ export default class MainGame extends Scene
     private onScrapCollected(amount: number)
     {
         this.levelProgBar.addProgress(amount)
+    }
+
+    private onWeaponCrateDied()
+    {
+        const gameStage = this.scene.get('GameStage') as GameStage
+        gameStage.initSpecialTurret()
     }
 
     private onLevelProgReachedNextLevel()

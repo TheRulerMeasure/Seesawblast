@@ -4,6 +4,7 @@ import UpgradeCard from "../gameobjects/user-interfaces/upgrades/UpgradeCard";
 import MainGame from "./MainGame";
 import UpgradeCardConf from "../gameobjects/user-interfaces/upgrades/UpgradeCardConf";
 import getUpgradeCardConfs from "../gameobjects/user-interfaces/upgrades/UpgradeCardCard";
+import SpecialTurretCard from "../gameobjects/user-interfaces/special-turrets/SpecialTurretCard";
 
 const getUniqueRandomNumbers = (min: number, max: number, count: number): number[] => {
     if (count > max - min + 1) {
@@ -22,6 +23,8 @@ const getUniqueRandomNumbers = (min: number, max: number, count: number): number
 
 export default class GameStage extends Scene
 {
+    private specialTurretCard: SpecialTurretCard
+
     private upgradeCardConfs: UpgradeCardConf[]
 
     private upgradeCards: UpgradeCard[]
@@ -41,6 +44,10 @@ export default class GameStage extends Scene
 
     create ()
     {
+        this.specialTurretCard = this.add.existing(new SpecialTurretCard(this))
+        this.specialTurretCard.on('left_button_pressed', this.onSpecialTurretCardLeftButtonPressed, this)
+        this.specialTurretCard.on('right_button_pressed', this.onSpecialTurretCardRightButtonPressed, this)
+
         this.upgradeCardConfs = getUpgradeCardConfs()
 
         this.upgradeCards = [
@@ -59,11 +66,6 @@ export default class GameStage extends Scene
             keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.P).on(Phaser.Input.Keyboard.Events.UP, this.onPauseButtonReleased, this)
             keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.Q).on(Phaser.Input.Keyboard.Events.UP, this.onQuitButtonReleased, this)
         }
-
-        for (let i = 0; i < 10; i++)
-        {
-            console.log(getUniqueRandomNumbers(1, 10, 5))
-        }
     }
 
     public initUpgrade()
@@ -76,6 +78,13 @@ export default class GameStage extends Scene
         {
             this.upgradeCards[i].start(this.tweens, this.upgradeCardConfs[nums[i]])
         }
+    }
+
+    public initSpecialTurret()
+    {
+        this.scene.pause('MainGame')
+
+        this.specialTurretCard.start()
     }
 
     private onPauseButtonReleased()
@@ -101,5 +110,21 @@ export default class GameStage extends Scene
         const mainGame = this.scene.get('MainGame') as MainGame
         mainGame.updateLevelProgress()
         mainGame.processUpgrade()
+    }
+
+    private onSpecialTurretCardLeftButtonPressed()
+    {
+        this.specialTurretCard.stop()
+        this.scene.resume('MainGame')
+        const mainGame = this.scene.get('MainGame') as MainGame
+        mainGame.attachNewGunLeft()
+    }
+
+    private onSpecialTurretCardRightButtonPressed()
+    {
+        this.specialTurretCard.stop()
+        this.scene.resume('MainGame')
+        const mainGame = this.scene.get('MainGame') as MainGame
+        mainGame.attachNewGunRight()
     }
 }

@@ -1,9 +1,6 @@
-import { GAME_HEIGHT, GAME_WIDTH, HEALTH_BAR_DEPTH } from '../../constants/GameConst'
+import { GAME_HEIGHT, GAME_WIDTH } from '../../constants/GameConst'
+import HealthBar from '../user-interfaces/HealthBar'
 import RoboConf from './RoboConf'
-
-const HEALTH_BAR_WIDTH = 32
-const HEALTH_BAR_HEIGHT = 8
-const HEALTH_BAR_OFFSET_Y = -32
 
 export default class Robo extends Phaser.Physics.Arcade.Sprite
 {
@@ -12,37 +9,30 @@ export default class Robo extends Phaser.Physics.Arcade.Sprite
 
     public scraps: number = 2
 
-    private hpBar: Phaser.GameObjects.Graphics
+    private hpBar: HealthBar
 
     constructor (scene: Phaser.Scene)
     {
         super(scene, 0, 0, 'robo')
         
-        this.hpBar = scene.add.graphics()
-        this.hpBar.fillStyle(0xff0000, 1.0)
-        this.hpBar.fillRect(HEALTH_BAR_WIDTH * -0.5, HEALTH_BAR_OFFSET_Y - HEALTH_BAR_HEIGHT * 0.5, HEALTH_BAR_WIDTH, HEALTH_BAR_HEIGHT)
-        this.hpBar.setDepth(HEALTH_BAR_DEPTH)
+        this.hpBar = scene.add.existing(new HealthBar(scene, 0.0, -22.0))
     }
 
-    update (_time: number, _delta: number)
+    update (time: number, delta: number)
     {
-        this.hpBar.setPosition(this.x, this.y)
+        this.hpBar.updatePos(this.x, this.y)
+        this.hpBar.update(time, delta)
     }
 
-    destroy (fromScene?: boolean)
+    destroy (_fromScene?: boolean)
     {
-        // console.log(`robo destroyed from scene = ${fromScene}`)
-        this.hpBar.destroy(fromScene)
+        // this.hpBar.destroy(fromScene)
     }
 
     public takeDamage(damage: number)
     {
         this.health -= damage
-        let width = this.health / this.maxHealth
-        width *= HEALTH_BAR_WIDTH
-        width = Math.floor(width)
-        this.hpBar.clear()
-        this.hpBar.fillRect(HEALTH_BAR_WIDTH * -0.5, HEALTH_BAR_OFFSET_Y - HEALTH_BAR_HEIGHT * 0.5, width, HEALTH_BAR_HEIGHT)
+        this.hpBar.draw(0.0, this.maxHealth, this.health)
         if (this.health <= 0)
         {
             this.emit('died', this.x, this.y, this.scraps)
@@ -62,8 +52,10 @@ export default class Robo extends Phaser.Physics.Arcade.Sprite
         this.play(conf.anim)
         this.setFlipX(x > GAME_WIDTH * 0.5)
 
+        // this.hpBar.draw(0.0, this.maxHealth, this.health)
+
         this.hpBar.setActive(true)
-        this.hpBar.setVisible(true)
+        // this.hpBar.setVisible(true)
 
         this.enableBody(true, x, y, true, true)
 

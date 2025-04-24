@@ -15,6 +15,7 @@ export enum Turrets
 }
 
 export const PROJECTILE_DEPTH = 10
+export const WEAPON_CRATE_DEPTH = 25
 export const MOB_DEPTH = 50
 export const SEESAW_DEPTH = 100
 export const EXPLOSION_DEPTH = 150
@@ -27,3 +28,8 @@ export const LEVEL_UP_LABEL_DEPTH = 1
 export const UPGRADE_CARD_PATCH_DEPTH = 2
 export const UPGRADE_CARD_NAME_DEPTH = 3
 export const UPGRADE_CARD_DESC_DEPTH = 4
+export const SPECIAL_TURRET_CARD_DEPTH = 5
+export const SPECIAL_TURRET_ICON_DEPTH = 6
+export const NEW_TURRET_LABEL_DEPTH = 7
+export const SP_TURRET_CARD_BUTTON_DEPTH = 8
+export const SP_TURRET_CARD_BUTTON_TEXT_DEPTH = 9
