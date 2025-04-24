@@ -22,6 +22,7 @@ export default class MainGame extends Scene
     private readonly maxRoboSpawnDelay: number = 2000.0
 
     private roboSpawnDelay: number = 0.0
+    private roboSpawnCount: number = 0
 
     private spawnRectInner: Phaser.Geom.Rectangle
     private spawnRectOuter: Phaser.Geom.Rectangle
@@ -45,8 +46,8 @@ export default class MainGame extends Scene
 
         this.roboGroup = this.physics.add.group({
             classType: Robo,
-            defaultKey: 'robo',
             maxSize: 50,
+            runChildUpdate: true,
         })
 
         this.explosionGroup = this.add.group({
@@ -79,36 +80,43 @@ export default class MainGame extends Scene
     update (time: number, delta: number)
     {
         this.seesaw.update(time, delta)
-        this.roboSpawnDelay += delta
+        if (this.roboSpawnCount < 10)
+        {
+            this.roboSpawnDelay += delta
+        }
         if (this.roboSpawnDelay >= this.maxRoboSpawnDelay)
         {
             const point = Phaser.Geom.Rectangle.RandomOutside(this.spawnRectOuter, this.spawnRectInner)
             this.putRoboAt(point.x, point.y)
             this.roboSpawnDelay = 0.0
+            this.roboSpawnCount++
         }
         this.levelProgBar.update(time, delta)
     }
 
-    public updateLevelProgress ()
+    public updateLevelProgress()
     {
         this.levelProgBar.updateAndSetNextLevel(150)
     }
 
-    private putRoboAt (x: number, y: number)
+    public processUpgrade()
+    {
+
+    }
+
+    private putRoboAt(x: number, y: number)
     {
         const robo: Robo = this.roboGroup.get()
         if (robo)
         {
             robo.setDepth(MOB_DEPTH)
             const conf = new RoboConf()
-            conf.minScraps = 5
-            conf.maxScraps = 15
             robo.start(x, y, 75, conf)
             robo.once('died', this.onRoboDied, this)
         }
     }
 
-    private putMuzzleFlashAt (x: number, y: number, rotation: number)
+    private putMuzzleFlashAt(x: number, y: number, rotation: number)
     {
         const muzzleFlash: Phaser.GameObjects.Sprite = this.explosionGroup.get(x, y, 'muzzle_flash')
         if (muzzleFlash)
@@ -125,7 +133,7 @@ export default class MainGame extends Scene
         }
     }
 
-    private putExplosionAt (x: number, y: number, big: boolean = false)
+    private putExplosionAt(x: number, y: number, big: boolean = false)
     {
         const explosion: Phaser.GameObjects.Sprite = this.explosionGroup.get(x, y, big ? 'explosion' : 'small_explosion')
         if (explosion)
@@ -153,7 +161,7 @@ export default class MainGame extends Scene
         }
     }
 
-    private onSeesawTurretLeftFired (x: number, y: number, rotation: number, rotVel: number, projectile: Projectiles)
+    private onSeesawTurretLeftFired(x: number, y: number, rotation: number, rotVel: number, projectile: Projectiles)
     {
         const rotationUp = rotation - Math.PI * 0.5
         const bullet: Bullet = this.bulletGroup.get()
@@ -170,7 +178,7 @@ export default class MainGame extends Scene
         this.putMuzzleFlashAt(muzzleX, muzzleY, rotationUp)
     }
 
-    private onSeesawTurretRightFired (x: number, y: number, rotation: number, rotVel: number, projectile: Projectiles)
+    private onSeesawTurretRightFired(x: number, y: number, rotation: number, rotVel: number, projectile: Projectiles)
     {
         const rotationUp = rotation - Math.PI * 0.5
         const bullet = this.bulletGroup.get() as Bullet
@@ -187,7 +195,7 @@ export default class MainGame extends Scene
         this.putMuzzleFlashAt(muzzleX, muzzleY, rotationUp)
     }
 
-    private onBulletOverlapRobo (bullet: any, robo: any)
+    private onBulletOverlapRobo(bullet: any, robo: any)
     {
         const b: Bullet = bullet
         this.putExplosionAt(b.x, b.y)
@@ -197,16 +205,15 @@ export default class MainGame extends Scene
         r.takeDamage(b.damage)
     }
 
-    private onSeesawOverlapEnemy (seesaw: any, enemy: any)
+    private onSeesawOverlapEnemy(seesaw: any, enemy: any)
     {
         const robo: Robo = enemy
-        robo.removeAllListeners('died')
-        robo.disableBody(true, true)
+        robo.stopBody()
         const s: Seesaw = seesaw
         s.TakeDamage(1)
     }
 
-    private onRoboDied (x: number, y: number, scraps: number)
+    private onRoboDied(x: number, y: number, scraps: number)
     {
         if (scraps < 10)
         {
@@ -231,7 +238,7 @@ export default class MainGame extends Scene
         this.putExplosionAt(x, y, true)
     }
 
-    private onScrapCollected (amount: number)
+    private onScrapCollected(amount: number)
     {
         this.levelProgBar.addProgress(amount)
     }

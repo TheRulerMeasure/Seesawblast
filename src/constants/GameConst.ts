@@ -19,8 +19,9 @@ export const MOB_DEPTH = 50
 export const SEESAW_DEPTH = 100
 export const EXPLOSION_DEPTH = 150
 export const SCRAP_DEPTH = 180
-export const LVL_PROGBAR_PROG_DEPTH = 201
-export const LVL_PROGBAR_OVER_DEPTH = 202
+export const HEALTH_BAR_DEPTH = 210
+export const LVL_PROGBAR_PROG_DEPTH = 250
+export const LVL_PROGBAR_OVER_DEPTH = 251
 
 export const LEVEL_UP_LABEL_DEPTH = 1
 export const UPGRADE_CARD_PATCH_DEPTH = 2

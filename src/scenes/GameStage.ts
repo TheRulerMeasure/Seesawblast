@@ -5,6 +5,21 @@ import MainGame from "./MainGame";
 import UpgradeCardConf from "../gameobjects/user-interfaces/upgrades/UpgradeCardConf";
 import getUpgradeCardConfs from "../gameobjects/user-interfaces/upgrades/UpgradeCardCard";
 
+const getUniqueRandomNumbers = (min: number, max: number, count: number): number[] => {
+    if (count > max - min + 1) {
+        throw new Error("Count exceeds the range of unique numbers")
+    }
+
+    const uniqueNumbers = new Set<number>()
+
+    while (uniqueNumbers.size < count) {
+        const randomNum = Math.floor(Math.random() * (max - min + 1)) + min
+        uniqueNumbers.add(randomNum)
+    }
+
+    return Array.from(uniqueNumbers)
+}
+
 export default class GameStage extends Scene
 {
     private upgradeCardConfs: UpgradeCardConf[]
@@ -44,6 +59,11 @@ export default class GameStage extends Scene
             keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.P).on(Phaser.Input.Keyboard.Events.UP, this.onPauseButtonReleased, this)
             keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.Q).on(Phaser.Input.Keyboard.Events.UP, this.onQuitButtonReleased, this)
         }
+
+        for (let i = 0; i < 10; i++)
+        {
+            console.log(getUniqueRandomNumbers(1, 10, 5))
+        }
     }
 
     public initUpgrade()
@@ -51,7 +71,7 @@ export default class GameStage extends Scene
         this.scene.pause('MainGame')
 
         this.levelUpLabel.setVisible(true)
-        const nums = this.getRandDiffValues(3, this.upgradeCardConfs.length)
+        const nums = getUniqueRandomNumbers(0, this.upgradeCardConfs.length - 1, 3)
         for (let i = 0; i < nums.length; i++)
         {
             this.upgradeCards[i].start(this.tweens, this.upgradeCardConfs[nums[i]])
@@ -80,35 +100,6 @@ export default class GameStage extends Scene
         }
         const mainGame = this.scene.get('MainGame') as MainGame
         mainGame.updateLevelProgress()
-    }
-
-    private getRandDiffValues(amount: number, vMax: number): number[]
-    {
-        if (amount > vMax)
-        {
-            return []
-        }
-        let prevN = 0
-        let maxN = vMax - amount
-        let nums: number[] = []
-        while (true)
-        {
-            const n = Phaser.Math.Between(prevN, maxN)
-            if (n >= maxN)
-            {
-                for (let i = maxN; i < vMax; i++)
-                {
-                    nums.push(i)
-                }
-                return nums
-            }
-            nums.push(n)
-            if (nums.length >= amount)
-            {
-                return nums
-            }
-            prevN = n + 1
-            maxN++
-        }
+        mainGame.processUpgrade()
     }
 }
