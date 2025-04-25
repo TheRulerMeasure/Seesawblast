@@ -1,5 +1,5 @@
 import { Input } from 'phaser'
-import { GAME_HEIGHT, GAME_WIDTH, HEALTH_POINT_DEPTH, Projectiles, SEESAW_BASE_DEPTH, SEESAW_DEPTH, Turrets } from '../constants/GameConst'
+import { GAME_HEIGHT, GAME_WIDTH, HEALTH_POINT_DEPTH, Projectiles, SEESAW_BASE_DEPTH, SEESAW_DEPTH, Turrets, Upgrades } from '../constants/GameConst'
 import Turret from './turrets/Turret'
 import SmallGun from './turrets/SmallGun'
 import GatlingGun from './turrets/GatlingGun'
@@ -47,10 +47,10 @@ export default class Seesaw extends Phaser.Physics.Arcade.Sprite
     private turretRotation: number = 0.0
     private turretRotationVelocity: number = 0.0
 
-    // private rotationVelocity: number = 0.0
-
     private turretBase: Phaser.GameObjects.Container
     private heartContainer: HeartContainer
+
+    private lasers: Phaser.GameObjects.Image[]
 
     constructor (scene: Phaser.Scene)
     {
@@ -113,6 +113,19 @@ export default class Seesaw extends Phaser.Physics.Arcade.Sprite
         this.turretBase.setRotation(this.turretRotation)
     }
 
+    public processUpgrade(upgrade: Upgrades)
+    {
+        switch (upgrade)
+        {
+            case Upgrades.ENABLE_LASERS:
+                for (let i = 0; i < this.lasers.length; i++)
+                {
+                    this.lasers[i].setVisible(true)
+                }
+                break
+        }
+    }
+
     public setTurretLeft(turretType: Turrets)
     {
         this.turretLeft.removeAllListeners('fired')
@@ -124,7 +137,7 @@ export default class Seesaw extends Phaser.Physics.Arcade.Sprite
         {
             case Turrets.GATLING_GUN:
                 turret = this.scene.add.existing(new GatlingGun(this.scene, x, y))
-                this.leftTurretRounds = this.leftTurretMaxRounds = 350
+                this.leftTurretRounds = this.leftTurretMaxRounds = 250
                 this.leftTurretAmmoBar.start()
                 this.leftTurretAmmoBar.draw(0, this.leftTurretMaxRounds, this.leftTurretRounds)
                 break
@@ -155,7 +168,7 @@ export default class Seesaw extends Phaser.Physics.Arcade.Sprite
         {
             case Turrets.GATLING_GUN:
                 turret = this.scene.add.existing(new GatlingGun(this.scene, x, y))
-                this.rightTurretRounds = this.rightTurretMaxRounds = 350
+                this.rightTurretRounds = this.rightTurretMaxRounds = 250
                 this.rightTurretAmmoBar.start()
                 this.rightTurretAmmoBar.draw(0, this.rightTurretMaxRounds, this.rightTurretRounds)
                 break
@@ -187,12 +200,19 @@ export default class Seesaw extends Phaser.Physics.Arcade.Sprite
         const upAng = Math.PI * -0.5
         const offsetY = -220
 
+        this.lasers = [
+            scene.add.image(this.turretLeftOffsetX, offsetY, 'laser').setRotation(upAng).setAlpha(maxAlpha, 0, maxAlpha, 0),
+            scene.add.image(this.turretRightOffsetX, offsetY, 'laser').setRotation(upAng).setAlpha(maxAlpha, 0, maxAlpha, 0),
+        ]
+        this.lasers[0].setVisible(false)
+        this.lasers[1].setVisible(false)
+
         return scene.make.container({
             x: GAME_WIDTH * 0.5, y: GAME_HEIGHT * 0.5,
             children: [
                 scene.add.image(0, 0, 'seesaw'),
-                scene.add.image(this.turretLeftOffsetX, offsetY, 'laser').setRotation(upAng).setAlpha(maxAlpha, 0, maxAlpha, 0),
-                scene.add.image(this.turretRightOffsetX, offsetY, 'laser').setRotation(upAng).setAlpha(maxAlpha, 0, maxAlpha, 0),
+                this.lasers[0],
+                this.lasers[1],
             ],
         })
     }

@@ -1,4 +1,4 @@
-import { GAME_HEIGHT, GAME_WIDTH, UPGRADE_CARD_DESC_DEPTH, UPGRADE_CARD_NAME_DEPTH, UPGRADE_CARD_PATCH_DEPTH } from "../../../constants/GameConst"
+import { GAME_HEIGHT, GAME_WIDTH, UPGRADE_CARD_DESC_DEPTH, UPGRADE_CARD_NAME_DEPTH, UPGRADE_CARD_PATCH_DEPTH, Upgrades } from "../../../constants/GameConst"
 import UpgradeCardConf from "./UpgradeCardConf"
 
 const CARD_WIDTH = 300
@@ -11,6 +11,8 @@ export default class UpgradeCard extends Phaser.GameObjects.NineSlice
     
     private cardNameText: Phaser.GameObjects.BitmapText
     private cardDescriptionText: Phaser.GameObjects.BitmapText
+
+    private upgrade: Upgrades
 
     constructor (scene: Phaser.Scene, cardIndex: number)
     {
@@ -35,6 +37,8 @@ export default class UpgradeCard extends Phaser.GameObjects.NineSlice
     {
         this.cardNameText.setText(conf.name)
         this.cardDescriptionText.setText(conf.descriptions)
+
+        this.upgrade = conf.upgrade
 
         this.setPosition(GAME_WIDTH * 0.5, GAME_HEIGHT + 500)
         this.setScale(0.5)
@@ -90,6 +94,6 @@ export default class UpgradeCard extends Phaser.GameObjects.NineSlice
 
     private onPressed()
     {
-        this.emit('upgrade_selected', this.cardIndex)
+        this.emit('upgrade_selected', this.upgrade)
     }
 }

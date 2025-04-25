@@ -16,6 +16,11 @@ export enum Turrets
     GRENADE_LAUNCHER,
 }
 
+export enum Upgrades
+{
+    ENABLE_LASERS,
+}
+
 export const PROJECTILE_DEPTH = 10
 export const WEAPON_CRATE_DEPTH = 25
 export const MOB_DEPTH = 50

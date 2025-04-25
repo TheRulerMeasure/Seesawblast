@@ -1,5 +1,5 @@
 import { Scene } from "phaser";
-import { GAME_HEIGHT, GAME_WIDTH, LEVEL_UP_LABEL_DEPTH } from "../constants/GameConst";
+import { GAME_HEIGHT, GAME_WIDTH, LEVEL_UP_LABEL_DEPTH, Upgrades } from "../constants/GameConst";
 import UpgradeCard from "../gameobjects/user-interfaces/upgrades/UpgradeCard";
 import MainGame from "./MainGame";
 import UpgradeCardConf from "../gameobjects/user-interfaces/upgrades/UpgradeCardConf";
@@ -98,10 +98,9 @@ export default class GameStage extends Scene
         this.scene.start('MainMenu')
     }
 
-    private onUpgradeCardGetSelected(cardIndex: number)
+    private onUpgradeCardGetSelected(upgrade: Upgrades)
     {
         this.levelUpLabel.setVisible(false)
-        console.log(`selected upgrade = ${cardIndex}`)
         this.scene.resume('MainGame')
         for (let i = 0; i < this.upgradeCards.length; i++)
         {
@@ -109,7 +108,7 @@ export default class GameStage extends Scene
         }
         const mainGame = this.scene.get('MainGame') as MainGame
         mainGame.updateLevelProgress()
-        mainGame.processUpgrade()
+        mainGame.processUpgrade(upgrade)
     }
 
     private onSpecialTurretCardLeftButtonPressed()

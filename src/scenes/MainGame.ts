@@ -1,6 +1,6 @@
 import { Scene } from 'phaser'
 import Seesaw from '../gameobjects/Seesaw'
-import { EXPLOSION_DEPTH, GAME_HEIGHT, GAME_WIDTH, MOB_DEPTH, PROJECTILE_DEPTH, Projectiles, SCRAP_DEPTH, Turrets, WEAPON_CRATE_DEPTH } from '../constants/GameConst'
+import { EXPLOSION_DEPTH, GAME_HEIGHT, GAME_WIDTH, MOB_DEPTH, PROJECTILE_DEPTH, Projectiles, SCRAP_DEPTH, Turrets, Upgrades, WEAPON_CRATE_DEPTH } from '../constants/GameConst'
 import Bullet from '../gameobjects/projectiles/Bullet'
 import Robo from '../gameobjects/mobs/Robo'
 import LevelProgBar from '../gameobjects/user-interfaces/LevelProgBar'
@@ -9,8 +9,52 @@ import RoboConf from '../gameobjects/mobs/RoboConf'
 import GameStage from './GameStage'
 import WeaponCrate from '../gameobjects/powerups/WeaponCrate'
 
+const MAX_ROBO_TYPES = 3
+
+const getRoboConfs = (): RoboConf[] => {
+    const conf1 = new RoboConf()
+    conf1.health = 5
+    conf1.texture = 'small_robo'
+    conf1.anim = 'small_robo_walk'
+    conf1.sizeX = 16
+    conf1.sizeY = 16
+    conf1.speed = 20
+    conf1.minScraps = 1
+    conf1.maxScraps = 2
+
+    const conf2 = new RoboConf()
+    conf2.health = 75
+    conf2.texture = 'robo'
+    conf2.anim = 'robo_walk'
+    conf2.sizeX = 32
+    conf2.sizeY = 32
+    conf2.speed = 15
+    conf2.minScraps = 4
+    conf2.maxScraps = 8
+    
+    const conf3 = new RoboConf()
+    conf3.health = 250
+    conf3.texture = 'tank'
+    conf3.anim = 'tank_walk'
+    conf3.sizeX = 64
+    conf3.sizeY = 64
+    conf3.speed = 8
+    conf3.minScraps = 9
+    conf3.maxScraps = 13
+
+    return [ conf1, conf2, conf3 ]
+}
+
 export default class MainGame extends Scene
 {
+    private readonly addLevelProgress: number = 200
+
+    private readonly maxWeaponCrateSpawnDelay: number = 48000
+
+    private readonly minRoboSpawnDelay = [ 3000, 4000, 8000 ]
+
+    private readonly roboConfs: RoboConf[] = getRoboConfs()
+
     private seesaw: Seesaw
 
     private bulletGroup: Phaser.Physics.Arcade.Group
@@ -23,13 +67,14 @@ export default class MainGame extends Scene
 
     private levelProgBar: LevelProgBar
 
-    private readonly maxRoboSpawnDelay: number = 2000.0
-    private readonly maxWeaponCrateSpawnDelay: number = 24000.0
+    private roboSpawnCounts: number[] = [ 0, 0, 0 ]
 
-    private roboSpawnDelay: number = 0.0
-    private roboSpawnCount: number = 0
+    private maxRoboSpawnDelays: number[] = [ 9000, 6500, 25000 ]
+    private roboSpawnDelays: number[] = [ 0, 3000, 0 ]
 
     private weaponCrateSpawnDelay: number = 0.0
+
+    private nextLevelProgress: number = 200
 
     private spawnRectInner: Phaser.Geom.Rectangle
     private spawnRectOuter: Phaser.Geom.Rectangle
@@ -95,14 +140,19 @@ export default class MainGame extends Scene
     {
         this.seesaw.update(time, delta)
 
-        this.roboSpawnDelay += delta
-
-        if (this.roboSpawnDelay >= this.maxRoboSpawnDelay)
+        for (let i = 0; i < MAX_ROBO_TYPES; i++)
         {
-            const point = Phaser.Geom.Rectangle.RandomOutside(this.spawnRectOuter, this.spawnRectInner)
-            this.putRoboAt(point.x, point.y)
-            this.roboSpawnDelay = 0.0
-            this.roboSpawnCount++
+            this.roboSpawnDelays[i] += delta
+            let maxDelay = this.maxRoboSpawnDelays[i]
+            maxDelay -= Math.floor(this.roboSpawnCounts[i] / 5) * 1000
+            maxDelay = Math.max(maxDelay, this.minRoboSpawnDelay[i])
+            if (this.roboSpawnDelays[i] >= maxDelay)
+            {
+                const point = Phaser.Geom.Rectangle.RandomOutside(this.spawnRectOuter, this.spawnRectInner)
+                this.putRoboAt(point.x, point.y, this.roboConfs[i])
+                this.roboSpawnCounts[i] += 1
+                this.roboSpawnDelays[i] = 0
+            }
         }
 
         this.weaponCrateSpawnDelay += delta
@@ -118,12 +168,13 @@ export default class MainGame extends Scene
 
     public updateLevelProgress()
     {
-        this.levelProgBar.updateAndSetNextLevel(150)
+        this.levelProgBar.updateAndSetNextLevel(this.nextLevelProgress)
+        this.nextLevelProgress += this.addLevelProgress
     }
 
-    public processUpgrade()
+    public processUpgrade(upgrade: Upgrades)
     {
-
+        this.seesaw.processUpgrade(upgrade)
     }
 
     public attachNewGunLeft()
@@ -173,22 +224,14 @@ export default class MainGame extends Scene
         }
     }
 
-    private putRoboAt(x: number, y: number)
+    private putRoboAt(x: number, y: number, conf: RoboConf)
     {
-        const health = 5
-        const conf = new RoboConf()
-        conf.texture = 'tank'
-        conf.anim = 'tank_walk'
-        conf.sizeX = 16
-        conf.sizeY = 16
-        conf.minScraps = 1
-        conf.maxScraps = 2
         const robo: Robo = this.roboGroup.get(x, y, conf.texture)
         if (robo)
         {
             robo.setDepth(MOB_DEPTH)
 
-            robo.start(x, y, health, conf)
+            robo.start(x, y, conf)
             robo.once('died', this.onRoboDied, this)
         }
     }

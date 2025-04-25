@@ -66,8 +66,8 @@ export default class Preloader extends Scene
 
         this.anims.create({
             key: 'small_robo_walk',
-            frames: this.anims.generateFrameNumbers('small_robo', { frames: [ 0, 1, 2 ] }),
-            frameRate: 12,
+            frames: this.anims.generateFrameNumbers('small_robo', { frames: [ 0, 1, 2, 1 ] }),
+            frameRate: 10,
             repeat: -1,
         })
 

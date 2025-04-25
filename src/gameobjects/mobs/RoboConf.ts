@@ -1,6 +1,7 @@
 
 export default class RoboConf
 {
+    public health: number = 75
     public texture: string = 'robo'
     public anim: string = 'robo_walk'
     public speed: number = 20

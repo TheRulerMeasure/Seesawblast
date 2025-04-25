@@ -40,24 +40,21 @@ export default class Robo extends Phaser.Physics.Arcade.Sprite
         }
     }
 
-    public start(x: number, y: number, health: number = 75, conf: RoboConf = new RoboConf())
+    public start(x: number, y: number, conf: RoboConf)
     {
-        this.setSize(conf.sizeX, conf.sizeY)
-
-        this.maxHealth = health
-        this.health = health
+        this.maxHealth = conf.health
+        this.health = conf.health
         this.scraps = Phaser.Math.Between(conf.minScraps, conf.maxScraps)
 
-        this.setTexture(conf.texture)
+        // this.setTexture(conf.texture)
         this.play(conf.anim)
         this.setFlipX(x > GAME_WIDTH * 0.5)
 
-        // this.hpBar.draw(0.0, this.maxHealth, this.health)
-
         this.hpBar.setActive(true)
-        // this.hpBar.setVisible(true)
 
-        this.enableBody(true, x, y, true, true)
+        this.enableBody(undefined, undefined, undefined, true, true)
+
+        this.setSize(conf.sizeX, conf.sizeY)
 
         let vec = new Phaser.Math.Vector2(GAME_WIDTH * 0.5, GAME_HEIGHT * 0.5)
         vec = vec.subtract(new Phaser.Math.Vector2(x, y))
