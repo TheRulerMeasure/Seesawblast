@@ -5,6 +5,7 @@ import SmallGun from './turrets/SmallGun'
 import GatlingGun from './turrets/GatlingGun'
 import HeartContainer from './user-interfaces/HeartContainer'
 import SpecialTurretAmmoBar from './user-interfaces/special-turrets/SpecialTurretAmmoBar'
+import GrenadeLauncher from './turrets/GrenadeLauncher'
 
 const COLLISION_SIZE = 120
 const ROTATION_DRAG = 0.15
@@ -127,6 +128,12 @@ export default class Seesaw extends Phaser.Physics.Arcade.Sprite
                 this.leftTurretAmmoBar.start()
                 this.leftTurretAmmoBar.draw(0, this.leftTurretMaxRounds, this.leftTurretRounds)
                 break
+            case Turrets.GRENADE_LAUNCHER:
+                turret = this.scene.add.existing(new GrenadeLauncher(this.scene, x, y))
+                this.leftTurretRounds = this.leftTurretMaxRounds = 25
+                this.leftTurretAmmoBar.start()
+                this.leftTurretAmmoBar.draw(0, this.leftTurretMaxRounds, this.leftTurretRounds)
+                break
             default:
                 this.leftTurretAmmoBar.stop()
                 turret = this.scene.add.existing(new SmallGun(this.scene, x, y))
@@ -149,6 +156,12 @@ export default class Seesaw extends Phaser.Physics.Arcade.Sprite
             case Turrets.GATLING_GUN:
                 turret = this.scene.add.existing(new GatlingGun(this.scene, x, y))
                 this.rightTurretRounds = this.rightTurretMaxRounds = 350
+                this.rightTurretAmmoBar.start()
+                this.rightTurretAmmoBar.draw(0, this.rightTurretMaxRounds, this.rightTurretRounds)
+                break
+            case Turrets.GRENADE_LAUNCHER:
+                turret = this.scene.add.existing(new GrenadeLauncher(this.scene, x, y))
+                this.rightTurretRounds = this.rightTurretMaxRounds = 25
                 this.rightTurretAmmoBar.start()
                 this.rightTurretAmmoBar.draw(0, this.rightTurretMaxRounds, this.rightTurretRounds)
                 break

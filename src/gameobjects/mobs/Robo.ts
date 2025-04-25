@@ -11,9 +11,9 @@ export default class Robo extends Phaser.Physics.Arcade.Sprite
 
     private hpBar: HealthBar
 
-    constructor (scene: Phaser.Scene)
+    constructor (scene: Phaser.Scene, x: number, y: number, texture: string)
     {
-        super(scene, 0, 0, 'robo')
+        super(scene, x, y, texture)
         
         this.hpBar = scene.add.existing(new HealthBar(scene, 0.0, -22.0))
     }

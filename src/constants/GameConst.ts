@@ -6,12 +6,14 @@ export enum Projectiles
 {
     BULLET,
     SMALL_BULLET,
+    GRENADE,
 }
 
 export enum Turrets
 {
     SMALL_GUN,
     GATLING_GUN,
+    GRENADE_LAUNCHER,
 }
 
 export const PROJECTILE_DEPTH = 10

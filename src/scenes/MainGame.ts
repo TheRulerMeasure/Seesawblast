@@ -53,6 +53,7 @@ export default class MainGame extends Scene
 
         this.roboGroup = this.physics.add.group({
             classType: Robo,
+            defaultKey: 'robo',
             maxSize: 50,
             runChildUpdate: true,
         })
@@ -174,12 +175,20 @@ export default class MainGame extends Scene
 
     private putRoboAt(x: number, y: number)
     {
-        const robo: Robo = this.roboGroup.get()
+        const health = 5
+        const conf = new RoboConf()
+        conf.texture = 'tank'
+        conf.anim = 'tank_walk'
+        conf.sizeX = 16
+        conf.sizeY = 16
+        conf.minScraps = 1
+        conf.maxScraps = 2
+        const robo: Robo = this.roboGroup.get(x, y, conf.texture)
         if (robo)
         {
             robo.setDepth(MOB_DEPTH)
-            const conf = new RoboConf()
-            robo.start(x, y, 75, conf)
+
+            robo.start(x, y, health, conf)
             robo.once('died', this.onRoboDied, this)
         }
     }

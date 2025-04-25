@@ -22,20 +22,25 @@ export default class Preloader extends Scene
 
         this.load.image('small_gun', 'weapons/small_gun.png')
         this.load.image('gatling_gun', 'weapons/gatling_gun.png')
+        this.load.image('grenade_launcher.png', 'weapons/grenade_launcher.png')
         this.load.image('laser', 'weapons/laser.png')
 
         this.load.image('weapon_crate', 'weapons/weapon_crate.png')
 
         this.load.image('gatling_gun_icon', 'user-interfaces/weapon-icons/gatling_gun_icon.png')
+        this.load.image('grenade_launcher_icon', 'user-interfaces/weapon-icons/grenade_launcher_icon.png')
 
         this.load.image('bullet', 'projectiles/bullet.png')
         this.load.image('small_bullet', 'projectiles/small_bullet.png')
 
         this.load.spritesheet('small_explosion', 'effects/small_explosion_sheet.png', { frameWidth: 24, frameHeight: 24 })
         this.load.spritesheet('explosion', 'effects/explosion_sheet.png', { frameWidth: 128, frameHeight: 128 })
+        this.load.spritesheet('grenade_explosion', 'effects/grenade_explosion_sheet.png', { frameWidth: 256, frameHeight: 256 })
         this.load.spritesheet('muzzle_flash', 'effects/muzzle_flash_sheet.png', { frameWidth: 32, frameHeight: 32 })
 
+        this.load.spritesheet('small_robo', 'mobs/small_robo_sheet.png', { frameWidth: 32, frameHeight: 32 })
         this.load.spritesheet('robo', 'mobs/robo_sheet.png', { frameWidth: 64, frameHeight: 64 })
+        this.load.spritesheet('tank', 'mobs/tank_sheet.png', { frameWidth: 96, frameHeight: 96 })
 
         this.load.spritesheet('heart', 'user-interfaces/heart_sheet.png', { frameWidth: 32, frameHeight: 32 })
         this.load.image('level_progbar_over', 'user-interfaces/level_progbar_over.png')
@@ -60,6 +65,20 @@ export default class Preloader extends Scene
         })
 
         this.anims.create({
+            key: 'small_robo_walk',
+            frames: this.anims.generateFrameNumbers('small_robo', { frames: [ 0, 1, 2 ] }),
+            frameRate: 12,
+            repeat: -1,
+        })
+
+        this.anims.create({
+            key: 'tank_walk',
+            frames: this.anims.generateFrameNumbers('tank', { frames: [ 0, 1, 2, 3 ] }),
+            frameRate: 12,
+            repeat: -1,
+        })
+
+        this.anims.create({
             key: 'small_explosion_explode',
             frames: this.anims.generateFrameNumbers('small_explosion', { frames: [ 0, 1, 2 ] }),
             duration: 250,
@@ -68,6 +87,11 @@ export default class Preloader extends Scene
             key: 'explosion_explode',
             frames: this.anims.generateFrameNumbers('explosion', { frames: [ 0, 1, 2, 3, 4, 5 ] }),
             duration: 500,
+        })
+        this.anims.create({
+            key: 'grenade_explosion_explode',
+            frames: this.anims.generateFrameNumbers('grenade_explosion', { frames: [ 0, 1, 2, 3, 4, 5, 6 ] }),
+            duration: 750,
         })
         this.anims.create({
             key: 'muzzle_flash_flash',
