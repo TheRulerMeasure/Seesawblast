@@ -236,13 +236,14 @@ export default class MainGame extends Scene
         if (bullet)
         {
             let addVel = Math.max(rotVel, 0.0)
-            addVel *= 1000.0
+            addVel *= 100.0
             const textureKeys = ['bullet', 'small_bullet']
             bullet.setDepth(PROJECTILE_DEPTH)
             bullet.launch(x, y, rotationUp, addVel, textureKeys[projectile])
         }
-        const muzzleX = x + Math.cos(rotationUp) * 34
-        const muzzleY = y + Math.sin(rotationUp) * 34
+        const outRadius = 34
+        const muzzleX = x + Math.cos(rotationUp) * outRadius
+        const muzzleY = y + Math.sin(rotationUp) * outRadius
         this.putMuzzleFlashAt(muzzleX, muzzleY, rotationUp)
     }
 
@@ -253,7 +254,7 @@ export default class MainGame extends Scene
         if (bullet)
         {
             let addVel = Math.min(rotVel, 0.0) * -1.0
-            addVel *= 1000.0
+            addVel *= 100.0
             const textureKeys = ['bullet', 'small_bullet']
             bullet.setDepth(PROJECTILE_DEPTH)
             bullet.launch(x, y, rotationUp, addVel, textureKeys[projectile])

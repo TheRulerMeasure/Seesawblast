@@ -1,28 +1,50 @@
 import { Input } from 'phaser'
-import { GAME_HEIGHT, GAME_WIDTH, Projectiles, Turrets } from '../constants/GameConst'
+import { GAME_HEIGHT, GAME_WIDTH, HEALTH_POINT_DEPTH, Projectiles, SEESAW_BASE_DEPTH, SEESAW_DEPTH, Turrets } from '../constants/GameConst'
 import Turret from './turrets/Turret'
 import SmallGun from './turrets/SmallGun'
 import GatlingGun from './turrets/GatlingGun'
 import HeartContainer from './user-interfaces/HeartContainer'
+import SpecialTurretAmmoBar from './user-interfaces/special-turrets/SpecialTurretAmmoBar'
+
+const COLLISION_SIZE = 120
+const ROTATION_DRAG = 0.15
+const MAX_ROTATION_VELOCITY = 3.5
+
+const LEFT_AMMO_BAR_X = GAME_WIDTH * 0.06
+const LEFT_AMMO_BAR_Y = GAME_HEIGHT * 0.5
+
+const RIGHT_AMMO_BAR_X = GAME_WIDTH * 0.94
+const RIGHT_AMMO_BAR_Y = GAME_HEIGHT * 0.5
+
+const moveToward = (fromVal: number, toVal: number, delta: number): number => {
+    const sign = Math.sign(toVal - fromVal)
+    return sign >= 1 ? Math.min(fromVal + delta, toVal) : sign <= -1 ? Math.max(fromVal - delta, toVal) : toVal
+}
 
 export default class Seesaw extends Phaser.Physics.Arcade.Sprite
 {
     public health: number = 3
 
-    // public friction: number = 0.8
-    // public maxRotationVelocity: number = 0.3
-
-    public turretLeft: Turret
-    public turretRight: Turret
-
     public turretLeftOffsetX: number = -85
     public turretRightOffsetX: number = 85
 
+    private turretLeft: Turret
+    private turretRight: Turret
+
     private leftTurretRounds: number = 0
+    private leftTurretMaxRounds: number = 900
+
     private rightTurretRounds: number = 0
+    private rightTurretMaxRounds: number = 900
+
+    private leftTurretAmmoBar: SpecialTurretAmmoBar
+    private rightTurretAmmoBar: SpecialTurretAmmoBar
 
     private leftKeys: Input.Keyboard.Key[]
     private rightKeys: Input.Keyboard.Key[]
+
+    private turretRotation: number = 0.0
+    private turretRotationVelocity: number = 0.0
 
     // private rotationVelocity: number = 0.0
 
@@ -34,7 +56,29 @@ export default class Seesaw extends Phaser.Physics.Arcade.Sprite
         super(scene, GAME_WIDTH * 0.5, GAME_HEIGHT * 0.5, 'seesaw_base')
         
         scene.add.existing(this)
-        scene.physics.add.existing(this)
+        scene.physics.add.existing(this, true)
+
+        this.setDepth(SEESAW_BASE_DEPTH)
+
+        this.setSize(COLLISION_SIZE, COLLISION_SIZE)
+
+        this.turretBase = scene.add.existing(this.addTurretBase(scene))
+        this.turretBase.setDepth(SEESAW_DEPTH)
+
+        this.turretLeft = scene.add.existing(new SmallGun(scene, this.turretLeftOffsetX, -5))
+        this.turretRight = scene.add.existing(new SmallGun(scene, this.turretRightOffsetX, -5))
+        this.turretBase.add([ this.turretLeft, this.turretRight ])
+
+        this.leftTurretAmmoBar = scene.add.existing(new SpecialTurretAmmoBar(scene, LEFT_AMMO_BAR_X, LEFT_AMMO_BAR_Y))
+        this.leftTurretAmmoBar.stop()
+        this.rightTurretAmmoBar = scene.add.existing(new SpecialTurretAmmoBar(scene, RIGHT_AMMO_BAR_X, RIGHT_AMMO_BAR_Y))
+        this.rightTurretAmmoBar.stop()
+
+        this.heartContainer = scene.add.existing(new HeartContainer(scene, GAME_WIDTH * 0.5, GAME_HEIGHT * 0.5 - 60))
+        this.heartContainer.setDepth(HEALTH_POINT_DEPTH)
+
+        this.turretLeft.on('fired', this.onTurretLeftFired, this)
+        this.turretRight.on('fired', this.onTurretRightFired, this)
 
         if (scene.input.keyboard)
         {
@@ -49,22 +93,8 @@ export default class Seesaw extends Phaser.Physics.Arcade.Sprite
         }
         else
         {
-            console.error('NO KEYBOARD')
+            throw new Error('NO KEYBOARD')
         }
-
-        this.setSize(120, 120)
-
-        this.turretBase = scene.add.existing(this.addTurretBase(scene))
-        // this.add(this.turretBase)
-        this.turretLeft = scene.add.existing(new SmallGun(scene, this.turretLeftOffsetX, -5))
-        this.turretRight = scene.add.existing(new SmallGun(scene, this.turretRightOffsetX, -5))
-        this.turretBase.add([ this.turretLeft, this.turretRight ])
-
-        this.heartContainer = scene.add.existing(new HeartContainer(scene, GAME_WIDTH * 0.5, GAME_HEIGHT * 0.5 - 60))
-        // this.add(this.heartContainer)
-
-        this.turretLeft.on('fired', this.onTurretLeftFired, this)
-        this.turretRight.on('fired', this.onTurretRightFired, this)
     }
 
     update(time: number, delta: number)
@@ -74,33 +104,12 @@ export default class Seesaw extends Phaser.Physics.Arcade.Sprite
 
         this.turretLeft.update(time, delta)
         this.turretRight.update(time, delta)
-        
-        this.turretBase.setRotation(this.getBody().rotation)
 
-        /*
-        this.turretBase.rotation += this.rotationVelocity * delta * 0.01
-        const frictionThreshold = 0.002
-        if (this.rotationVelocity > frictionThreshold)
-        {
-            this.rotationVelocity -= this.friction * delta * 0.00001
-            if (this.rotationVelocity <= frictionThreshold)
-            {
-                this.rotationVelocity = 0.0
-            }
-        }
-        else if (this.rotationVelocity < -frictionThreshold)
-        {
-            this.rotationVelocity += this.friction * delta * 0.00001
-            if (this.rotationVelocity >= -frictionThreshold)
-            {
-                this.rotationVelocity = 0.0
-            }
-        }
-        else
-        {
-            this.rotationVelocity = 0.0
-        }
-        */
+        this.turretRotation += this.turretRotationVelocity * delta * 0.001
+
+        this.turretRotationVelocity = moveToward(this.turretRotationVelocity, 0, ROTATION_DRAG * delta * 0.001)
+
+        this.turretBase.setRotation(this.turretRotation)
     }
 
     public setTurretLeft(turretType: Turrets)
@@ -114,9 +123,12 @@ export default class Seesaw extends Phaser.Physics.Arcade.Sprite
         {
             case Turrets.GATLING_GUN:
                 turret = this.scene.add.existing(new GatlingGun(this.scene, x, y))
-                this.leftTurretRounds = 100
+                this.leftTurretRounds = this.leftTurretMaxRounds = 350
+                this.leftTurretAmmoBar.start()
+                this.leftTurretAmmoBar.draw(0, this.leftTurretMaxRounds, this.leftTurretRounds)
                 break
             default:
+                this.leftTurretAmmoBar.stop()
                 turret = this.scene.add.existing(new SmallGun(this.scene, x, y))
                 break
         }
@@ -136,9 +148,12 @@ export default class Seesaw extends Phaser.Physics.Arcade.Sprite
         {
             case Turrets.GATLING_GUN:
                 turret = this.scene.add.existing(new GatlingGun(this.scene, x, y))
-                this.leftTurretRounds = 100
+                this.rightTurretRounds = this.rightTurretMaxRounds = 350
+                this.rightTurretAmmoBar.start()
+                this.rightTurretAmmoBar.draw(0, this.rightTurretMaxRounds, this.rightTurretRounds)
                 break
             default:
+                this.rightTurretAmmoBar.stop()
                 turret = this.scene.add.existing(new SmallGun(this.scene, x, y))
                 break
         }
@@ -169,22 +184,12 @@ export default class Seesaw extends Phaser.Physics.Arcade.Sprite
         })
     }
 
-    private getBody(): Phaser.Physics.Arcade.Body
-    {
-        if (this.body)
-        {
-            return this.body as Phaser.Physics.Arcade.Body
-        }
-        throw new Error('see saw is not a bodi')
-    }
-
     private onTurretLeftFired(projectile: Projectiles)
     {
-        // this.rotationVelocity -= this.turretLeft.maxForce * 0.01
-        // this.rotationVelocity = Math.max(this.rotationVelocity, -this.maxRotationVelocity)
-        this.getBody().setAngularVelocity(this.getBody().angularVelocity - this.turretRight.maxForce * 0.1)
-        const x = Math.cos(this.getBody().rotation) * this.turretLeftOffsetX + this.x
-        const y = Math.sin(this.getBody().rotation) * this.turretLeftOffsetX + this.y
+        this.turretRotationVelocity -= this.turretLeft.maxForce * 0.1
+        this.turretRotationVelocity = Math.max(this.turretRotationVelocity, -MAX_ROTATION_VELOCITY)
+        const x = Math.cos(this.turretRotation) * this.turretLeftOffsetX + this.x
+        const y = Math.sin(this.turretRotation) * this.turretLeftOffsetX + this.y
         if (this.leftTurretRounds > 0)
         {
             this.leftTurretRounds--
@@ -192,17 +197,20 @@ export default class Seesaw extends Phaser.Physics.Arcade.Sprite
             {
                 this.setTurretLeft(Turrets.SMALL_GUN)
             }
+            else
+            {
+                this.leftTurretAmmoBar.draw(0, this.leftTurretMaxRounds, this.leftTurretRounds)
+            }
         }
-        this.emit('turret_left_fired', x, y, this.turretBase.rotation, this.getBody().angularVelocity, projectile)
+        this.emit('turret_left_fired', x, y, this.turretBase.rotation, this.turretRotationVelocity, projectile)
     }
 
     private onTurretRightFired(projectile: Projectiles)
     {
-        // this.rotationVelocity += this.turretRight.maxForce * 0.01
-        // this.rotationVelocity = Math.min(this.rotationVelocity, this.maxRotationVelocity)
-        this.getBody().setAngularVelocity(this.getBody().angularVelocity + this.turretRight.maxForce * 0.1)
-        const x = Math.cos(this.getBody().rotation) * this.turretRightOffsetX + this.x
-        const y = Math.sin(this.getBody().rotation) * this.turretRightOffsetX + this.y
+        this.turretRotationVelocity += this.turretRight.maxForce * 0.1
+        this.turretRotationVelocity = Math.min(this.turretRotationVelocity, MAX_ROTATION_VELOCITY)
+        const x = Math.cos(this.turretRotation) * this.turretRightOffsetX + this.x
+        const y = Math.sin(this.turretRotation) * this.turretRightOffsetX + this.y
         if (this.rightTurretRounds > 0)
         {
             this.rightTurretRounds--
@@ -210,7 +218,11 @@ export default class Seesaw extends Phaser.Physics.Arcade.Sprite
             {
                 this.setTurretRight(Turrets.SMALL_GUN)
             }
+            else
+            {
+                this.rightTurretAmmoBar.draw(0, this.rightTurretMaxRounds, this.rightTurretRounds)
+            }
         }
-        this.emit('turret_right_fired', x, y, this.turretBase.rotation, this.getBody().angularVelocity, projectile)
+        this.emit('turret_right_fired', x, y, this.turretBase.rotation, this.turretRotationVelocity, projectile)
     }
 }

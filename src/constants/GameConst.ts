@@ -17,12 +17,16 @@ export enum Turrets
 export const PROJECTILE_DEPTH = 10
 export const WEAPON_CRATE_DEPTH = 25
 export const MOB_DEPTH = 50
-export const SEESAW_DEPTH = 100
+export const SEESAW_BASE_DEPTH = 95
+export const SEESAW_DEPTH = 96
 export const EXPLOSION_DEPTH = 150
 export const SCRAP_DEPTH = 180
+export const HEALTH_POINT_DEPTH = 195
 export const HEALTH_BAR_DEPTH = 210
 export const LVL_PROGBAR_PROG_DEPTH = 250
 export const LVL_PROGBAR_OVER_DEPTH = 251
+export const AMMO_ICON_DEPTH = 252
+export const AMMO_BAR_DEPTH = 253
 
 export const LEVEL_UP_LABEL_DEPTH = 1
 export const UPGRADE_CARD_PATCH_DEPTH = 2
