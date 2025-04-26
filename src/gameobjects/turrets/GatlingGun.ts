@@ -7,7 +7,7 @@ export default class GatlingGun extends Turret
     {
         super(scene, x, y, 'gatling_gun')
         this.projectileType = Projectiles.SMALL_BULLET
-        this.maxFireDelay = 100
+        this.maxFireDelay = 75
         this.maxForce = 0.75
     }
 }

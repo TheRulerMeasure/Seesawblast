@@ -1,10 +1,12 @@
 import { Scene } from "phaser";
-import { GAME_HEIGHT, GAME_WIDTH, LEVEL_UP_LABEL_DEPTH, Upgrades } from "../constants/GameConst";
+import { GAME_HEIGHT, GAME_OVER_LABEL_DEPTH, GAME_WIDTH, LEVEL_UP_LABEL_DEPTH, Upgrades } from "../constants/GameConst";
 import UpgradeCard from "../gameobjects/user-interfaces/upgrades/UpgradeCard";
 import MainGame from "./MainGame";
 import UpgradeCardConf from "../gameobjects/user-interfaces/upgrades/UpgradeCardConf";
 import getUpgradeCardConfs from "../gameobjects/user-interfaces/upgrades/UpgradeCardCard";
 import SpecialTurretCard from "../gameobjects/user-interfaces/special-turrets/SpecialTurretCard";
+
+const MAX_GAME_OVER_TIME = 3000
 
 const getUniqueRandomNumbers = (min: number, max: number, count: number): number[] => {
     if (count > max - min + 1) {
@@ -31,6 +33,11 @@ export default class GameStage extends Scene
 
     private levelUpLabel: Phaser.GameObjects.BitmapText
 
+    private gameOverLabel: Phaser.GameObjects.BitmapText
+
+    private gameOver: boolean = false
+    private gameOverTime: number = 0.0
+
     constructor ()
     {
         super({ key: 'GameStage', active: false })
@@ -44,6 +51,9 @@ export default class GameStage extends Scene
 
     create ()
     {
+        this.gameOver = false
+        this.gameOverTime = 0.0
+
         this.specialTurretCard = this.add.existing(new SpecialTurretCard(this))
         this.specialTurretCard.on('left_button_pressed', this.onSpecialTurretCardLeftButtonPressed, this)
         this.specialTurretCard.on('right_button_pressed', this.onSpecialTurretCardRightButtonPressed, this)
@@ -60,11 +70,22 @@ export default class GameStage extends Scene
         this.levelUpLabel.setDepth(LEVEL_UP_LABEL_DEPTH)
         this.levelUpLabel.setVisible(false)
 
-        const keyboard = this.input.keyboard
-        if (keyboard)
+        this.gameOverLabel = this.add.bitmapText(GAME_WIDTH * 0.5, GAME_HEIGHT * 0.5, 'mini_font', 'GAME OVER')
+        this.gameOverLabel.setDepth(GAME_OVER_LABEL_DEPTH)
+        this.gameOverLabel.setOrigin(0.5, 0.5)
+        this.gameOverLabel.setVisible(false)
+    }
+
+    update(_time: number, delta: number)
+    {
+        if (!this.gameOver)
         {
-            keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.P).on(Phaser.Input.Keyboard.Events.UP, this.onPauseButtonReleased, this)
-            keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.Q).on(Phaser.Input.Keyboard.Events.UP, this.onQuitButtonReleased, this)
+            return
+        }
+        this.gameOverTime += delta
+        if (this.gameOverTime >= MAX_GAME_OVER_TIME)
+        {
+            this.changeToMainMenu()
         }
     }
 
@@ -87,12 +108,14 @@ export default class GameStage extends Scene
         this.specialTurretCard.start()
     }
 
-    private onPauseButtonReleased()
+    public initGameOver()
     {
-
+        this.scene.pause('MainGame')
+        this.gameOver = true
+        this.gameOverLabel.setVisible(true)
     }
 
-    private onQuitButtonReleased()
+    private changeToMainMenu()
     {
         this.scene.stop('MainGame')
         this.scene.start('MainMenu')

@@ -11,6 +11,8 @@ import WeaponCrate from '../gameobjects/powerups/WeaponCrate'
 
 const MAX_ROBO_TYPES = 3
 
+const INITAL_SPAWN_DELAYS = [ 9000, 6500, 25000 ]
+
 const getRoboConfs = (): RoboConf[] => {
     const conf1 = new RoboConf()
     conf1.health = 5
@@ -69,8 +71,8 @@ export default class MainGame extends Scene
 
     private roboSpawnCounts: number[] = [ 0, 0, 0 ]
 
-    private maxRoboSpawnDelays: number[] = [ 9000, 6500, 25000 ]
-    private roboSpawnDelays: number[] = [ 0, 3000, 0 ]
+    private maxRoboSpawnDelays: number[] = [ ...INITAL_SPAWN_DELAYS ]
+    private roboSpawnDelays: number[] = [ 0, 0, 0 ]
 
     private weaponCrateSpawnDelay: number = 0.0
 
@@ -86,8 +88,12 @@ export default class MainGame extends Scene
 
     create ()
     {
+        this.resetValues()
+
         this.spawnRectInner = new Phaser.Geom.Rectangle(-10, -10, GAME_WIDTH + 20, GAME_HEIGHT + 20)
         this.spawnRectOuter = new Phaser.Geom.Rectangle(-50, -50, GAME_WIDTH + 100, GAME_HEIGHT + 100)
+
+        this.add.image(GAME_WIDTH * 0.5, GAME_HEIGHT * 0.5, 'game_bg')
 
         this.bulletGroup = this.physics.add.group({
             classType: Bullet,
@@ -128,6 +134,7 @@ export default class MainGame extends Scene
 
         this.seesaw.on('turret_left_fired', this.onSeesawTurretLeftFired, this)
         this.seesaw.on('turret_right_fired', this.onSeesawTurretRightFired, this)
+        this.seesaw.on('died', this.onSeesawDied, this)
 
         this.levelProgBar.on('reached_next_level', this.onLevelProgReachedNextLevel, this)
 
@@ -204,6 +211,7 @@ export default class MainGame extends Scene
 
     private putWeaponCrateAt(x: number, y: number)
     {
+        const maxVel = 25
         const weaponCrate: WeaponCrate = this.weaponCrateGroup.get()
         if (weaponCrate)
         {
@@ -213,11 +221,11 @@ export default class MainGame extends Scene
             let velY = 0.0
             if (horizontalMovement)
             {
-                velX = x > GAME_WIDTH * 0.5 ? -50 : 50
+                velX = x > GAME_WIDTH * 0.5 ? -maxVel : maxVel
             }
             else
             {
-                velY = y > GAME_HEIGHT * 0.5 ? -50 : 50
+                velY = y > GAME_HEIGHT * 0.5 ? -maxVel : maxVel
             }
             weaponCrate.start(x, y, velX, velY)
             weaponCrate.once('died', this.onWeaponCrateDied, this)
@@ -278,6 +286,17 @@ export default class MainGame extends Scene
             scrap.setDepth(SCRAP_DEPTH)
             scrap.start(x, y, this.tweens, amount)
             scrap.once('get_collected', this.onScrapCollected, this)
+        }
+    }
+
+    private resetValues()
+    {
+        this.weaponCrateSpawnDelay = 0.0
+        for (let i = 0; i < MAX_ROBO_TYPES; i++)
+        {
+            this.roboSpawnDelays[i] = 0
+            this.maxRoboSpawnDelays[i] = INITAL_SPAWN_DELAYS[i]
+            this.roboSpawnCounts[i] = 0
         }
     }
 
@@ -384,5 +403,11 @@ export default class MainGame extends Scene
     {
         const gameStage = this.scene.get('GameStage') as GameStage
         gameStage.initUpgrade()
+    }
+
+    private onSeesawDied()
+    {
+        const gameStage = this.scene.get('GameStage') as GameStage
+        gameStage.initGameOver()
     }
 }

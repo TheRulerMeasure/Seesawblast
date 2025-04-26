@@ -17,6 +17,9 @@ export default class Preloader extends Scene
     {
         this.load.setPath('assets/textures/')
 
+        this.load.image('game_bg', 'backgrounds/game_bg.png')
+        this.load.image('menu_bg', 'backgrounds/menu_bg.png')
+
         this.load.image('seesaw', 'weapons/seesaw.png')
         this.load.image('seesaw_base', 'weapons/seesaw_base.png')
 
@@ -53,6 +56,10 @@ export default class Preloader extends Scene
         this.load.setPath('assets/fonts/kenney-kenney-font/')
 
         this.load.bitmapFont('mini_font', 'kenney-mini-bmfont.png', 'kenney-mini-bmfont.xml')
+
+        this.load.setPath('assets/music/')
+        
+        this.load.audio('music', '08_TheTorch.mp3')
     }
 
     create ()
@@ -99,6 +106,12 @@ export default class Preloader extends Scene
             duration: 300,
         })
 
-        this.scene.start('GameStage')
+        const music = this.sound.add('music', {
+            loop: true,
+            volume: 0.45,
+        })
+        music.play()
+
+        this.scene.start('MainMenu')
     }
 }

@@ -21,6 +21,7 @@ export enum Upgrades
     ENABLE_LASERS,
 }
 
+export const BACKGROUND_DEPTH = 1
 export const PROJECTILE_DEPTH = 10
 export const WEAPON_CRATE_DEPTH = 25
 export const MOB_DEPTH = 50
@@ -44,3 +45,4 @@ export const SPECIAL_TURRET_ICON_DEPTH = 6
 export const NEW_TURRET_LABEL_DEPTH = 7
 export const SP_TURRET_CARD_BUTTON_DEPTH = 8
 export const SP_TURRET_CARD_BUTTON_TEXT_DEPTH = 9
+export const GAME_OVER_LABEL_DEPTH = 10

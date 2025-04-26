@@ -17,7 +17,8 @@ const LEFT_AMMO_BAR_Y = GAME_HEIGHT * 0.5
 const RIGHT_AMMO_BAR_X = GAME_WIDTH * 0.94
 const RIGHT_AMMO_BAR_Y = GAME_HEIGHT * 0.5
 
-const moveToward = (fromVal: number, toVal: number, delta: number): number => {
+const moveToward = (fromVal: number, toVal: number, delta: number): number =>
+{
     const sign = Math.sign(toVal - fromVal)
     return sign >= 1 ? Math.min(fromVal + delta, toVal) : sign <= -1 ? Math.max(fromVal - delta, toVal) : toVal
 }
@@ -59,6 +60,8 @@ export default class Seesaw extends Phaser.Physics.Arcade.Sprite
         scene.add.existing(this)
         scene.physics.add.existing(this, true)
 
+        // scene.add.
+
         this.setDepth(SEESAW_BASE_DEPTH)
 
         this.setSize(COLLISION_SIZE, COLLISION_SIZE)
@@ -75,7 +78,7 @@ export default class Seesaw extends Phaser.Physics.Arcade.Sprite
         this.rightTurretAmmoBar = scene.add.existing(new SpecialTurretAmmoBar(scene, RIGHT_AMMO_BAR_X, RIGHT_AMMO_BAR_Y))
         this.rightTurretAmmoBar.stop()
 
-        this.heartContainer = scene.add.existing(new HeartContainer(scene, GAME_WIDTH * 0.5, GAME_HEIGHT * 0.5 - 60))
+        this.heartContainer = scene.add.existing(new HeartContainer(scene, GAME_WIDTH * 0.5, GAME_HEIGHT * 0.5 - 5))
         this.heartContainer.setDepth(HEALTH_POINT_DEPTH)
 
         this.turretLeft.on('fired', this.onTurretLeftFired, this)
@@ -192,6 +195,10 @@ export default class Seesaw extends Phaser.Physics.Arcade.Sprite
     {
         this.health -= damage
         this.heartContainer.setHealthPoint(this.health)
+        if (this.health <= 0)
+        {
+            this.emit('died')
+        }
     }
 
     private addTurretBase(scene: Phaser.Scene)
